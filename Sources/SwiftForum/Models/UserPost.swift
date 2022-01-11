@@ -1,9 +1,8 @@
 //
 //  UserPost.swift
-//  TwisterFoundation
+//  SwiftForum
 //
-//  Created by Amr Aboelela on 12/16/19.
-//  Copyright © 2019 Amr Aboelela. All rights reserved.
+//  Created by Amr Aboelela on 1/11/22.
 //
 
 import Foundation

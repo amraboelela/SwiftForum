@@ -1,32 +1,36 @@
 //
 //  SwiftForumDB.swift
-//  TwisterFoundation
+//  SwiftForum
 //
-//  Created by Amr Aboelela on 2/24/18.
-//  Copyright © 2018 Amr Aboelela. All rights reserved.
+//  Created by Amr Aboelela on 1/11/22.
 //
 
 import Foundation
 import SwiftLevelDB
 import Dispatch
+import TwisterFoundation
 
-public let swiftForumDB = SwiftForumDB()
+public let swiftForumDB = SwiftForumDB(name: "SwiftForumDB")
 
-open class SwiftForumDB: LevelDB {
-    public var dbPath = ""
-    public var libraryPath = ""
+open class SwiftForumDB: Database {
+    //public var dbPath = ""
+    //public var libraryPath = ""
     
-    var dbBackupPath = ""
+    /*var dbBackupPath = ""
     var lastBackupTime = TimeInterval(0)
     #if DEBUG && os(Linux)
     let BackupInterval = TimeInterval(0)
     #else
     let BackupInterval = Date.oneDay
-    #endif
+    #endif*/
     
     // MARK: - Life cycle
     
-    public init() {
+    override init(name: String) {
+        super.init(name: name)
+    }
+    
+    /*public override init() {
         let name = "SwiftForumDB"
         #if DEBUG
             //logger.log("SwiftForumDB DEBUG")
@@ -47,14 +51,14 @@ open class SwiftForumDB: LevelDB {
                 dbBackupPath = dbPath + "\(weekday)"
             #endif
             logger.log("SwiftForumDB.dbBackupPath")
-        #else
+        /*#else
             dbPath = NSURL(fileURLWithPath: name).path ?? ""
             if dbPath == "/" + name {
                 libraryPath = SwiftForumDB.getLibraryPath()
                 dbPath = NSURL(fileURLWithPath: libraryPath, isDirectory: true).appendingPathComponent(name)?.path ?? ""
             }
             let weekday = 1
-            dbBackupPath = dbPath + "-\(weekday)"
+            dbBackupPath = dbPath + "-\(weekday)"*/
         #endif
         
         //logger.log("dbBackupPath: \(dbBackupPath)")
@@ -100,13 +104,13 @@ open class SwiftForumDB: LevelDB {
         //logger.log("before SwiftForumDB.lastBackupTime")
         //lastBackupTime = Date.timeIntervalSinceReferenceDate
         //logger.log("after SwiftForumDB.lastBackupTime")
-    }
+    }*/
     
     required public init(path: String, name: String) {
         super.init(path: path, name: name)
         //fatalError("init(path:name:) has not been implemented")
     }
-    
+    /*
     deinit {
         //logger.log("deinit called")
     }
@@ -168,6 +172,6 @@ open class SwiftForumDB: LevelDB {
         }
         catch {
         }
-    }
+    }*/
 }
 

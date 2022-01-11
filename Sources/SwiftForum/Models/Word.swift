@@ -1,9 +1,8 @@
 //
 //  Word.swift
-//  TwisterFoundation
+//  SwiftForum
 //
-//  Created by Amr Aboelela on 4/20/20.
-//  Copyright © 2020 Amr Aboelela. All rights reserved.
+//  Created by Amr Aboelela on 1/11/22.
 //
 
 import Foundation

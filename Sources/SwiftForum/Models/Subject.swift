@@ -1,5 +1,5 @@
 //
-//  Post.swift
+//  Subject.swift
 //  SwiftForum
 //
 //  Created by Amr Aboelela on 1/11/22.
@@ -7,8 +7,8 @@
 
 import Foundation
 
-public struct PostsContainer: Codable {
-    public var posts: [Post]
+/*public struct PostsContainer: Codable {
+    public var posts: [Subject]
 }
 
 public struct PostReference: Codable {
@@ -19,11 +19,11 @@ public struct PostReference: Codable {
         case username = "u"
         case id = "k"
     }
-}
+}*/
 
-public struct Post: Codable {
-    public static let prefix = "post-"
-    public static var posts = [Post]()
+public struct Subject: Codable {
+    public static let prefix = "subject-"
+    public static var posts = [Subject]()
 
     static var newPostsLastFileSize = 0
     
@@ -73,9 +73,9 @@ public struct Post: Codable {
     
     public static var lastKey: String {
         var result = ""
-        swiftForumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: prefix) { (key, post: Post, stop) in
-            if post.isNew == true {
-                print("post at key: \(key) is news")
+        swiftForumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: prefix) { (key, subject: Subject, stop) in
+            if subject.isNew == true {
+                print("subject at key: \(key) is news")
             } else {
                 result = key
                 stop.pointee = true
@@ -102,15 +102,15 @@ public struct Post: Codable {
     }
 
     public var key: String {
-        return Post.prefix + "\(time ?? 0)-" + username
+        return Subject.prefix + "\(time ?? 0)-" + username
     }
     
-    public var repliesThread: [Post] {
+    public var repliesThread: [Subject] {
         var result = self.replyToPosts
         var currentPost = self
         if let postTime = self.time {
-            let postKey = Post.prefix + "\(postTime)-" + self.username
-            if let thePost: Post = swiftForumDB[postKey] {
+            let postKey = Subject.prefix + "\(postTime)-" + self.username
+            if let thePost: Subject = swiftForumDB[postKey] {
                 currentPost = thePost
             }
         }
@@ -119,17 +119,17 @@ public struct Post: Codable {
         return result
     }
     
-    var replyToPosts: [Post] {
-        var result = [Post]()
+    var replyToPosts: [Subject] {
+        var result = [Subject]()
         var currentPost = self
         while true {
             if let reply = currentPost.replyTo {
-                if let postKey = Post.postKey(forUsername: reply.username, postID: reply.id), let post: Post = swiftForumDB[postKey] {
-                    result.append(post)
-                    currentPost = post
+                if let postKey = Subject.postKey(forUsername: reply.username, postID: reply.id), let subject: Subject = swiftForumDB[postKey] {
+                    result.append(subject)
+                    currentPost = subject
                     continue
                 } else {
-                    result.append(Post(username: reply.username, id: reply.id))
+                    result.append(Subject(username: reply.username, id: reply.id))
                 }
             }
             break
@@ -137,16 +137,16 @@ public struct Post: Codable {
         return result.reversed()
     }
      
-    var replyPosts: [Post] {
-        var result = [Post]()
+    var replyPosts: [Subject] {
+        var result = [Subject]()
         if let replies = self.replies {
             if replies.count > 0 {
                 for reply in replies {
-                    if let postKey = Post.postKey(forUsername: reply.username, postID: reply.id), let thePost: Post = swiftForumDB[postKey] {
+                    if let postKey = Subject.postKey(forUsername: reply.username, postID: reply.id), let thePost: Subject = swiftForumDB[postKey] {
                         result.append(thePost)
                         result.append(contentsOf: (thePost.replyPosts))
                     } else {
-                        result.append(Post(username: reply.username, id: reply.id))
+                        result.append(Subject(username: reply.username, id: reply.id))
                     }
                 }
             }
@@ -156,18 +156,25 @@ public struct Post: Codable {
 
     // MARK: - Reading data
     
-    public static func with(username: String, time: Int? = 0) -> Post {
-        return Post(username: username, time: time)
+    public static func with(username: String, time: Int? = 0) -> Subject {
+        return Subject(username: username, time: time)
     }
 
-    public static func from(key: String) -> Post {
-        return Post(username: username(fromPostKey: key), time: time(fromPostKey: key))
+    public static func from(key: String) -> Subject {
+        return Subject(username: username(fromPostKey: key), time: time(fromPostKey: key))
     }
 
-    public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, count: Int) -> [Post] {
+    public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, count: Int) -> [Subject] {
         let blockedUsers = User.blockedUsers
-        var result = [Post]()
+        var result = [Subject]()
         let blockedUsernames = blockedUsers.map { $0.username }
+        //var followees: Set<String>?
+        /*if followeesOnly {
+            followees = User.followees
+            if followees?.count == 0 {
+                return result
+            }
+        }*/
         let searchWords = Word.words(fromText: searchText)
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
@@ -188,7 +195,7 @@ public struct Post: Codable {
             }
             for wordPostKey in wordPostKeys {
                 var foundTheSearch = true
-                if let post: Post = swiftForumDB[wordPostKey], let message = post.message {
+                if let subject: Subject = swiftForumDB[wordPostKey], let message = subject.message {
                     for i in 1..<searchWords.count {
                         let searchWord = searchWords[i]
                         if message.lowercased().range(of: searchWord) == nil {
@@ -197,8 +204,8 @@ public struct Post: Codable {
                         }
                     }
                     if foundTheSearch {
-                        if !blockedUsernames.contains(post.username) {
-                            result.append(post)
+                        if !blockedUsernames.contains(subject.username) {
+                            result.append(subject)
                         }
                     }
                 }
@@ -213,10 +220,10 @@ public struct Post: Codable {
             if let time = time {
                 startAtKey = prefix + "\(time)"
             }
-            swiftForumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
+            swiftForumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, subject: Subject, stop) in
                 if result.count < count {
-                    if !blockedUsernames.contains(post.username) {
-                        result.append(post)
+                    if !blockedUsernames.contains(subject.username) {
+                        result.append(subject)
                     }
                 } else {
                     stop.pointee = true
@@ -226,8 +233,8 @@ public struct Post: Codable {
         return result
     }
 
-    public static func posts(withHashtagOrMention hashtagOrMention: String, searchText: String? = nil, beforePostTime: Int? = nil, count: Int) -> [Post] {
-        var result = [Post]()
+    public static func posts(withHashtagOrMention hashtagOrMention: String, searchText: String? = nil, beforePostTime: Int? = nil, count: Int) -> [Subject] {
+        var result = [Subject]()
         
         var mentionPostKeys = [String]()
         if let searchText = searchText, !searchText.isEmpty {
@@ -241,11 +248,11 @@ public struct Post: Codable {
                 }
             }
             for mentionPostKey in mentionPostKeys {
-                if let post: Post = swiftForumDB[mentionPostKey], let message = post.message {
+                if let subject: Subject = swiftForumDB[mentionPostKey], let message = subject.message {
                     let theTextSearch = searchText.lowercased()
                     if message.lowercased().range(of: theTextSearch) != nil {
                         if result.count < count {
-                            result.append(post)
+                            result.append(subject)
                         } else {
                             break
                         }
@@ -271,16 +278,16 @@ public struct Post: Codable {
                 }
             }
             for mentionPostKey in mentionPostKeys {
-                if let post: Post = swiftForumDB[mentionPostKey] {
-                    result.append(post)
+                if let subject: Subject = swiftForumDB[mentionPostKey] {
+                    result.append(subject)
                 }
             }
         }
         return result
     }
 
-    public static func posts(forUsername username: String, searchText: String = "", beforePostID: String? = nil, count: Int) -> [Post] {
-        var result = [Post]()
+    public static func posts(forUsername username: String, searchText: String = "", beforePostID: String? = nil, count: Int) -> [Subject] {
+        var result = [Subject]()
         var postKeys = [String]()
         var postKeySet = Set<String>()
         if searchText == "" {
@@ -299,8 +306,8 @@ public struct Post: Codable {
                 }
             }
             for postKey in postKeys {
-                if let post: Post = swiftForumDB[postKey] {
-                    result.append(post)
+                if let subject: Subject = swiftForumDB[postKey] {
+                    result.append(subject)
                 }
             }
         } else {
@@ -310,9 +317,9 @@ public struct Post: Codable {
                 userPostKeys.append(userPost.postKey)
             }
             for userPostKey in userPostKeys {
-                if let post: Post = swiftForumDB[userPostKey], let message = post.message, message.lowercased().range(of: theTextSearch) != nil {
+                if let subject: Subject = swiftForumDB[userPostKey], let message = subject.message, message.lowercased().range(of: theTextSearch) != nil {
                     if result.count < count {
-                        result.append(post)
+                        result.append(subject)
                     } else {
                         break
                     }
@@ -323,10 +330,10 @@ public struct Post: Codable {
         return result
     }
 
-    public static func post(withUsername username: String, postID: String) -> Post? {
+    public static func subject(withUsername username: String, postID: String) -> Subject? {
         if let postKey = self.postKey(forUsername: username, postID: postID) {
-            if let post: Post = swiftForumDB[postKey] {
-                return post
+            if let subject: Subject = swiftForumDB[postKey] {
+                return subject
             }
         }
         return nil
@@ -334,16 +341,16 @@ public struct Post: Codable {
 
     // MARK: - Saving data
     
-    public static func save(newPost: Post) {
+    public static func save(newPost: Subject) {
         var theNewPost = newPost
         theNewPost.isNew = true
-        _ = self.save(post: theNewPost)
+        _ = self.save(subject: theNewPost)
     }
     
-    public static func save(posts: [Post]) -> Int {
+    public static func save(posts: [Subject]) -> Int {
         var saveCount = 0
-        for post in posts {
-            if self.save(post: post) {
+        for subject in posts {
+            if self.save(subject: subject) {
                 saveCount+=1;
             }
         }
@@ -352,9 +359,9 @@ public struct Post: Codable {
     
     // MARK: - Public functions
     
-    public static func isRepostWithEmptyMessage(post: Post) -> Bool {
-        /*if (post[PostRepository.reposted] as? [String:String]) != nil {
-         let postMessage = post[PostRepository.message] as? String ?? ""
+    public static func isRepostWithEmptyMessage(subject: Subject) -> Bool {
+        /*if (subject[PostRepository.reposted] as? [String:String]) != nil {
+         let postMessage = subject[PostRepository.message] as? String ?? ""
          if postMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty  {
          return true
          }
@@ -362,15 +369,15 @@ public struct Post: Codable {
         return false
     }
     
-    /*public func repostUsername(ofPost post: [String:Any]) -> String? {
-     if let rt = post[PostRepository.reposted] as? [String:String], let rtUsername = rt[UserRepository.username] {
+    /*public func repostUsername(ofPost subject: [String:Any]) -> String? {
+     if let rt = subject[PostRepository.reposted] as? [String:String], let rtUsername = rt[UserRepository.username] {
      return rtUsername
      }
      return nil
      }*/
     
-    public static func updateTranslation(forPost post: Post, translation: [String:String]) {
-        var aPost = post
+    public static func updateTranslation(forPost subject: Subject, translation: [String:String]) {
+        var aPost = subject
         if var aTranslation = aPost.translation {
             for (key,value) in translation {
                 aTranslation.updateValue(value, forKey:key)
@@ -379,41 +386,41 @@ public struct Post: Codable {
         } else {
             aPost.translation = translation
         }
-        let key = self.key(ofPost: post)
+        let key = self.key(ofPost: subject)
         swiftForumDB[key] = aPost
     }
     
-    public static func key(ofPost post: Post) -> String {
-        return prefix + "\(post.time ?? 0)-" + post.username
+    public static func key(ofPost subject: Subject) -> String {
+        return prefix + "\(subject.time ?? 0)-" + subject.username
     }
     
-    public static func removeExtraFields(fromPosts posts: [Post]) -> [Post] {
-        var result = [Post]()
-        for var post in posts {
-            post.signature = nil
-            post.lastK = nil
-            post.height = nil
-            result.append(post)
+    public static func removeExtraFields(fromPosts posts: [Subject]) -> [Subject] {
+        var result = [Subject]()
+        for var subject in posts {
+            subject.signature = nil
+            subject.lastK = nil
+            subject.height = nil
+            result.append(subject)
         }
         return result
     }
     
-    public static func save(post: Post) -> Bool {
+    public static func save(subject: Subject) -> Bool {
         var thereAreNewPosts = false
-        guard let k = post.id, let postTime = post.time, let postMessage = post.message else {
-            NSLog("save post, couldn't get k or postTime or postMessage")
+        guard let k = subject.id, let postTime = subject.time, let postMessage = subject.message else {
+            NSLog("save subject, couldn't get k or postTime or postMessage")
             return false
         }
-        let u = post.username
+        let u = subject.username
         let postKey = prefix + "\(postTime)-" + u
-        if let _: Post = swiftForumDB[postKey] {
+        if let _: Subject = swiftForumDB[postKey] {
         } else {
             thereAreNewPosts = true
 
-            //logger.log("Saving: post with key: \(postKey)")
-            let userPostKey = UserPost.prefix + post.username + "-" + zeroPaddedPostID(k)
+            //logger.log("Saving: subject with key: \(postKey)")
+            let userPostKey = UserPost.prefix + subject.username + "-" + zeroPaddedPostID(k)
             swiftForumDB[userPostKey] = UserPost(postKey: postKey)
-            swiftForumDB[postKey] = post
+            swiftForumDB[postKey] = subject
             for hashtag in HashtagOrMention.hashtags(fromText: postMessage) {
                 swiftForumDB[hashtag + "-\(postTime)-" + u] = HashtagOrMention(postKey: postKey)
             }
@@ -447,11 +454,11 @@ public struct Post: Codable {
         return result
     }
     
-    public static func posts(forKeys keys: [String]) -> [Post] {
-        var result = [Post]()
+    public static func posts(forKeys keys: [String]) -> [Subject] {
+        var result = [Subject]()
         for postKey in keys {
-            if let post: Post = swiftForumDB[postKey] {
-                result.append(post)
+            if let subject: Subject = swiftForumDB[postKey] {
+                result.append(subject)
             }
         }
         return result

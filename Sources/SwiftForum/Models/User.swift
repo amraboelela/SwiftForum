@@ -1,9 +1,8 @@
 //
 //  User.swift
-//  TwisterFoundation
+//  SwiftForum
 //
-//  Created by Amr Aboelela on 12/17/19.
-//  Copyright © 2019 Amr Aboelela. All rights reserved.
+//  Created by Amr Aboelela on 1/11/22.
 //
 
 import Foundation
@@ -29,14 +28,14 @@ public struct User: Codable, Hashable {
     public var username: String?
     public var rawStatus: String?
     public var time: Int?
-    public var privateKey: String?
+    //public var privateKey: String?
     public var fullname: String?
     public var bio: String?
     public var location: String?
     public var url: String?
     public var avatar: String?
-    public var followers: [String]?
-    public var followees: [String]?
+    //public var followers: [String]?
+    //public var followees: [String]?
     public var blockedBy: [String]?
     public var reportedBy: [String]?
 
@@ -44,21 +43,21 @@ public struct User: Codable, Hashable {
         case username = "u"
         case rawStatus = "s"
         case time = "t"
-        case privateKey = "pk"
+        //case privateKey = "pk"
         case fullname
         case bio
         case location
         case url
         case avatar
-        case followers = "fr"
-        case followees = "fe"
+        //case followers = "fr"
+        //case followees = "fe"
         case blockedBy = "bb"
         case reportedBy = "rb"
     }
 
     // MARK: - Accessors
 
-    public var status: UserStatus {
+    /*public var status: UserStatus {
         get {
             if let rawStatus = rawStatus, let result = UserStatus(rawValue:rawStatus) {
                 return result
@@ -68,31 +67,31 @@ public struct User: Codable, Hashable {
         set {
             self.rawStatus = newValue.rawValue
         }
-    }
+    }*/
 
-    public static var currentUser: User {
+    public static var currentUser: User? {
         get {
-            if let currentUser: User = database[currentUsernameKey] {
+            if let currentUser: User = swiftForumDB[currentUsernameKey] {
                 return currentUser
             } else {
-                let user = guestUser
-                database[currentUsernameKey] = guestUser
-                return user
+                //let user = guestUser
+                //swiftForumDB[currentUsernameKey] = guestUser
+                return nil
             }
         }
         set {
-            database[currentUsernameKey] = newValue
-            database[User.prefix + User.currentUsername] = newValue
+            swiftForumDB[currentUsernameKey] = newValue
+            swiftForumDB[User.prefix + User.currentUsername] = newValue
         }
     }
 
     public static var currentUsername: String {
         get {
-            return currentUser.username ?? ""
+            return currentUser?.username ?? ""
         }
     }
 
-    public static var guestUser: User {
+    /*public static var guestUser: User {
         return User(username: "guest_" + myDevice.id.lowercased().suffix(5))
     }
 
@@ -103,11 +102,11 @@ public struct User: Codable, Hashable {
     }
 
     public static var followees: Set<String> {
-        if let user: User = database[currentUsernameKey], let followees = user.followees {
+        if let user: User = swiftForumDB[currentUsernameKey], let followees = user.followees {
             return Set(followees)
         }
         return Set<String>()
-    }
+    }*/
 
     // MARK: - Static functions
     
@@ -130,7 +129,7 @@ public struct User: Codable, Hashable {
     }
 
     public static func userWith(username: String) -> User {
-        if let user: User = database[prefix + username] {
+        if let user: User = swiftForumDB[prefix + username] {
             return user
         } else {
             return User(username: username)
@@ -209,7 +208,7 @@ public struct User: Codable, Hashable {
     // MARK: - Public functions
 
     public static func usernameExists(_ username: String) -> Bool {
-        if let _: User = database[User.prefix + username] {
+        if let _: User = swiftForumDB[User.prefix + username] {
             return true
         } else {
             return false
@@ -220,7 +219,7 @@ public struct User: Codable, Hashable {
         let blockedUsers = User.blockedUsers
         var result = [User]()
         let blockedUsernames = blockedUsers.map { $0.username }
-        database.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix + usernamePrefix) { (key, user: User, stop) in
+        swiftForumDB.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix + usernamePrefix) { (key, user: User, stop) in
             if !blockedUsernames.contains(user.username) {
                 result.append(user)
             }
@@ -230,7 +229,7 @@ public struct User: Codable, Hashable {
 
     public static var blockedUsers: [User] {
         var result = [User]()
-        database.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix) { (key, user: User, stop) in
+        swiftForumDB.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix) { (key, user: User, stop) in
             result.append(user)
         }
         result.removeAll { user in
@@ -242,7 +241,7 @@ public struct User: Codable, Hashable {
         return result
     }
 
-    public static func isFollowingUser(withUsername username: String) -> Bool {
+    /*public static func isFollowingUser(withUsername username: String) -> Bool {
         if let followees = currentUser.followees, followees.contains(username) {
             return true
         }
@@ -250,7 +249,7 @@ public struct User: Codable, Hashable {
     }
     
     public static func followUser(withUsername username: String) {
-        if var user: User = database[User.prefix + username] {
+        if var user: User = swiftForumDB[User.prefix + username] {
             if let followers = user.followers {
                 var followersSet = Set(followers)
                 followersSet.insert(User.currentUsername)
@@ -258,13 +257,13 @@ public struct User: Codable, Hashable {
             } else {
                 user.followers = [User.currentUsername]
             }
-            database[User.prefix + username] = user
+            swiftForumDB[User.prefix + username] = user
         }
         addFollowee(withUsername: username)
     }
     
     public static func unfollowUser(withUsername username: String) {
-        if var user: User = database[User.prefix + username] {
+        if var user: User = swiftForumDB[User.prefix + username] {
             if var followers = user.followers {
                 followers.remove(object: User.currentUsername)
                 if followers.count > 0 {
@@ -273,14 +272,14 @@ public struct User: Codable, Hashable {
                     user.followers = nil
                 }
             }
-            database[User.prefix + username] = user
+            swiftForumDB[User.prefix + username] = user
         }
         removeFollowee(withUsername: username)
-    }
+    }*/
     
     // MARK: - Private functions
 
-    static func addFollowee(withUsername username: String) {
+    /*static func addFollowee(withUsername username: String) {
         var user = User.currentUser
         if let followees = user.followees {
             var followeesSet = Set(followees)
@@ -303,5 +302,5 @@ public struct User: Codable, Hashable {
             }
         }
         User.currentUser = user
-    }
+    }*/
 }
