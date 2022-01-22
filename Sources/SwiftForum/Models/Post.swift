@@ -7,17 +7,17 @@
 
 import Foundation
 
-public struct PostsContainer: Codable {
+/*public struct PostsContainer: Codable {
     public var posts: [Post]
-}
+}*/
 
 public struct PostReference: Codable {
+    public var time: Int
     public var username: String
-    public var id: String
     
     public enum CodingKeys: String, CodingKey {
+        case time = "t"
         case username = "u"
-        case id = "k"
     }
 }
 
@@ -25,48 +25,24 @@ public struct Post: Codable {
     public static let prefix = "post-"
     public static var posts = [Post]()
 
-    static var newPostsLastFileSize = 0
-    
+    public var time: Int
     public var username: String
-    public var message: String?
-    public var urlContent: String?
-    public var id: String?
-    public var time: Int?
+    public var message: String
+    public var parentPost: PostReference?
     public var replyTo: PostReference?
-    public var replies: [PostReference]?
-    public var reposted: PostReference?
     public var isNew: Bool?
-    public var signature: String?
-    public var lastK: Int?
-    public var height: Int?
-    public var translation: [String:String]?
+    public var isClosed: Bool?
+    public var isDeleted: Bool?
     
     public enum CodingKeys: String, CodingKey {
+        case time = "t"
         case username = "u"
         case message = "msg"
-        case urlContent
-        case id = "k"
-        case time = "t"
-        case replyTo = "r"
-        case replies = "rs"
-        case reposted = "rt"
-        case isNew = "in"
-        case signature = "sig"
-        case lastK
-        case height
-        case translation
-    }
-    
-    public static func postKey(forUsername username: String, postID: String) -> String? {
-        let key = UserPost.prefix + username + "-" + zeroPaddedPostID(postID)
-        if let userPost: UserPost = swiftForumDB[key] {
-            return userPost.postKey
-        }
-        return nil
-    }
-    
-    static func zeroPaddedPostID(_ postID: String) -> String {
-        return String(format: "%010d", Int(postID) ?? 0)
+        case parentPost = "pp"
+        case replyTo = "rt"
+        case isNew
+        case isClosed
+        case isDeleted
     }
     
     // MARK: - Accessors
@@ -102,66 +78,17 @@ public struct Post: Codable {
     }
 
     public var key: String {
-        return Post.prefix + "\(time ?? 0)-" + username
-    }
-    
-    public var repliesThread: [Post] {
-        var result = self.replyToPosts
-        var currentPost = self
-        if let postTime = self.time {
-            let postKey = Post.prefix + "\(postTime)-" + self.username
-            if let thePost: Post = swiftForumDB[postKey] {
-                currentPost = thePost
-            }
-        }
-        result.append(currentPost)
-        result.append(contentsOf: self.replyPosts)
-        return result
-    }
-    
-    var replyToPosts: [Post] {
-        var result = [Post]()
-        var currentPost = self
-        while true {
-            if let reply = currentPost.replyTo {
-                if let postKey = Post.postKey(forUsername: reply.username, postID: reply.id), let post: Post = swiftForumDB[postKey] {
-                    result.append(post)
-                    currentPost = post
-                    continue
-                } else {
-                    result.append(Post(username: reply.username, id: reply.id))
-                }
-            }
-            break
-        }
-        return result.reversed()
-    }
-     
-    var replyPosts: [Post] {
-        var result = [Post]()
-        if let replies = self.replies {
-            if replies.count > 0 {
-                for reply in replies {
-                    if let postKey = Post.postKey(forUsername: reply.username, postID: reply.id), let thePost: Post = swiftForumDB[postKey] {
-                        result.append(thePost)
-                        result.append(contentsOf: (thePost.replyPosts))
-                    } else {
-                        result.append(Post(username: reply.username, id: reply.id))
-                    }
-                }
-            }
-        }
-        return result
+        return Post.prefix + "\(time)-" + username
     }
 
     // MARK: - Reading data
     
-    public static func with(username: String, time: Int? = 0) -> Post {
-        return Post(username: username, time: time)
+    public static func with(username: String, time: Int) -> Post {
+        return Post(time: time, username: username, message: "")
     }
 
     public static func from(key: String) -> Post {
-        return Post(username: username(fromPostKey: key), time: time(fromPostKey: key))
+        return Post(time: time(fromPostKey: key) ?? 0, username: username(fromPostKey: key), message: "")
     }
 
     public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, count: Int) -> [Post] {
@@ -188,10 +115,10 @@ public struct Post: Codable {
             }
             for wordPostKey in wordPostKeys {
                 var foundTheSearch = true
-                if let post: Post = swiftForumDB[wordPostKey], let message = post.message {
+                if let post: Post = swiftForumDB[wordPostKey] {
                     for i in 1..<searchWords.count {
                         let searchWord = searchWords[i]
-                        if message.lowercased().range(of: searchWord) == nil {
+                        if post.message.lowercased().range(of: searchWord) == nil {
                             foundTheSearch = false
                             break
                         }
@@ -203,7 +130,7 @@ public struct Post: Codable {
                     }
                 }
             }
-            result = result.sorted { $0.time ?? 0 > $1.time ?? 0 }
+            result = result.sorted { $0.time > $1.time }
             if result.count > count {
                 result.removeLast(result.count - count)
             }
@@ -241,9 +168,9 @@ public struct Post: Codable {
                 }
             }
             for mentionPostKey in mentionPostKeys {
-                if let post: Post = swiftForumDB[mentionPostKey], let message = post.message {
+                if let post: Post = swiftForumDB[mentionPostKey] {
                     let theTextSearch = searchText.lowercased()
-                    if message.lowercased().range(of: theTextSearch) != nil {
+                    if post.message.lowercased().range(of: theTextSearch) != nil {
                         if result.count < count {
                             result.append(post)
                         } else {
@@ -310,7 +237,7 @@ public struct Post: Codable {
                 userPostKeys.append(userPost.postKey)
             }
             for userPostKey in userPostKeys {
-                if let post: Post = swiftForumDB[userPostKey], let message = post.message, message.lowercased().range(of: theTextSearch) != nil {
+                if let post: Post = swiftForumDB[userPostKey], post.message.lowercased().range(of: theTextSearch) != nil {
                     if result.count < count {
                         result.append(post)
                     } else {
@@ -321,15 +248,6 @@ public struct Post: Codable {
             
         }
         return result
-    }
-
-    public static func post(withUsername username: String, postID: String) -> Post? {
-        if let postKey = self.postKey(forUsername: username, postID: postID) {
-            if let post: Post = swiftForumDB[postKey] {
-                return post
-            }
-        }
-        return nil
     }
 
     // MARK: - Saving data
@@ -352,76 +270,30 @@ public struct Post: Codable {
     
     // MARK: - Public functions
     
-    public static func isRepostWithEmptyMessage(post: Post) -> Bool {
-        /*if (post[PostRepository.reposted] as? [String:String]) != nil {
-         let postMessage = post[PostRepository.message] as? String ?? ""
-         if postMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty  {
-         return true
-         }
-         }*/
-        return false
-    }
-    
-    /*public func repostUsername(ofPost post: [String:Any]) -> String? {
-     if let rt = post[PostRepository.reposted] as? [String:String], let rtUsername = rt[UserRepository.username] {
-     return rtUsername
-     }
-     return nil
-     }*/
-    
-    public static func updateTranslation(forPost post: Post, translation: [String:String]) {
-        var aPost = post
-        if var aTranslation = aPost.translation {
-            for (key,value) in translation {
-                aTranslation.updateValue(value, forKey:key)
-            }
-            aPost.translation = aTranslation
-        } else {
-            aPost.translation = translation
-        }
-        let key = self.key(ofPost: post)
-        swiftForumDB[key] = aPost
-    }
-    
     public static func key(ofPost post: Post) -> String {
-        return prefix + "\(post.time ?? 0)-" + post.username
-    }
-    
-    public static func removeExtraFields(fromPosts posts: [Post]) -> [Post] {
-        var result = [Post]()
-        for var post in posts {
-            post.signature = nil
-            post.lastK = nil
-            post.height = nil
-            result.append(post)
-        }
-        return result
+        return prefix + "\(post.time)-" + post.username
     }
     
     public static func save(post: Post) -> Bool {
         var thereAreNewPosts = false
-        guard let k = post.id, let postTime = post.time, let postMessage = post.message else {
-            NSLog("save post, couldn't get k or postTime or postMessage")
-            return false
-        }
-        let u = post.username
-        let postKey = prefix + "\(postTime)-" + u
+        let username = post.username
+        let postKey = prefix + "\(post.time)-" + username
         if let _: Post = swiftForumDB[postKey] {
         } else {
             thereAreNewPosts = true
 
             //logger.log("Saving: post with key: \(postKey)")
-            let userPostKey = UserPost.prefix + post.username + "-" + zeroPaddedPostID(k)
+            let userPostKey = UserPost.prefix + post.username + "-\(post.time)" //zeroPaddedPostID(k)
             swiftForumDB[userPostKey] = UserPost(postKey: postKey)
             swiftForumDB[postKey] = post
-            for hashtag in HashtagOrMention.hashtags(fromText: postMessage) {
-                swiftForumDB[hashtag + "-\(postTime)-" + u] = HashtagOrMention(postKey: postKey)
+            for hashtag in HashtagOrMention.hashtags(fromText: post.message) {
+                swiftForumDB[hashtag + "-\(post.time)-" + username] = HashtagOrMention(postKey: postKey)
             }
-            for mention in HashtagOrMention.mentions(fromText: postMessage) {
-                swiftForumDB[mention + "-\(postTime)-" + u] = HashtagOrMention(postKey: postKey)
+            for mention in HashtagOrMention.mentions(fromText: post.message) {
+                swiftForumDB[mention + "-\(post.time)-" + username] = HashtagOrMention(postKey: postKey)
             }
-            for word in Word.words(fromText: postMessage) {
-                swiftForumDB[Word.prefix + word + "-\(postTime)-" + u] = Word(postKey: postKey)
+            for word in Word.words(fromText: post.message) {
+                swiftForumDB[Word.prefix + word + "-\(post.time)-" + username] = Word(postKey: postKey)
             }
         }
         return thereAreNewPosts
