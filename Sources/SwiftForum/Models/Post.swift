@@ -7,10 +7,6 @@
 
 import Foundation
 
-/*public struct PostsContainer: Codable {
-    public var posts: [Post]
-}*/
-
 public struct PostReference: Codable {
     public var time: Int
     public var username: String
@@ -23,16 +19,17 @@ public struct PostReference: Codable {
 
 public struct Post: Codable {
     public static let prefix = "post-"
-    public static var posts = [Post]()
+    public static var numberOfReports = 0
 
     public var time: Int
     public var username: String
     public var message: String
     public var parentPost: PostReference?
+    public var numberOfChildren: Int?
     public var replyTo: PostReference?
-    public var isNew: Bool?
     public var isClosed: Bool?
     public var isDeleted: Bool?
+    public var reportedBy: [String]?
     
     public enum CodingKeys: String, CodingKey {
         case time = "t"
@@ -40,7 +37,6 @@ public struct Post: Codable {
         case message = "msg"
         case parentPost = "pp"
         case replyTo = "rt"
-        case isNew
         case isClosed
         case isDeleted
     }
@@ -50,12 +46,8 @@ public struct Post: Codable {
     public static var lastKey: String {
         var result = ""
         swiftForumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: prefix) { (key, post: Post, stop) in
-            if post.isNew == true {
-                print("post at key: \(key) is news")
-            } else {
-                result = key
-                stop.pointee = true
-            }
+            result = key
+            stop.pointee = true
         }
         return result
     }
@@ -92,9 +84,9 @@ public struct Post: Codable {
     }
 
     public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, count: Int) -> [Post] {
-        let blockedUsers = User.blockedUsers
+        //let blockedUsers = User.blockedUsers
         var result = [Post]()
-        let blockedUsernames = blockedUsers.map { $0.username }
+        //let blockedUsernames = blockedUsers.map { $0.username }
         let searchWords = Word.words(fromText: searchText)
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
@@ -124,7 +116,7 @@ public struct Post: Codable {
                         }
                     }
                     if foundTheSearch {
-                        if !blockedUsernames.contains(post.username) {
+                        if !(post.isDeleted == true) { //!blockedUsernames.contains(post.username) {
                             result.append(post)
                         }
                     }
@@ -142,7 +134,7 @@ public struct Post: Codable {
             }
             swiftForumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
                 if result.count < count {
-                    if !blockedUsernames.contains(post.username) {
+                    if !(post.isDeleted == true) { //}!blockedUsernames.contains(post.username) {
                         result.append(post)
                     }
                 } else {
@@ -253,8 +245,8 @@ public struct Post: Codable {
     // MARK: - Saving data
     
     public static func save(newPost: Post) {
-        var theNewPost = newPost
-        theNewPost.isNew = true
+        let theNewPost = newPost
+        //theNewPost.isNew = true
         _ = self.save(post: theNewPost)
     }
     
