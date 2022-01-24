@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftLevelDB
 
 public enum UserRole: String {
     case regular
@@ -21,7 +22,7 @@ public struct User: Codable, Hashable {
     public var username: String
     public var rawRole: String
     public var password: String
-    public var lastUpdatedTime: Int?
+    public var timeJoined: Int
     public var bio: String?
     public var location: String?
     public var url: String?
@@ -32,7 +33,7 @@ public struct User: Codable, Hashable {
         case username = "u"
         case rawRole = "r"
         case password = "p"
-        case lastUpdatedTime = "t"
+        case timeJoined = "t"
         case bio
         case location
         case url
@@ -57,14 +58,14 @@ public struct User: Codable, Hashable {
     // MARK: - Static functions
     
     public static func createWith(username: String) -> User {
-        return User(username: username, rawRole: UserRole.regular.rawValue, password: "")
+        return User(username: username, rawRole: UserRole.regular.rawValue, password: "", timeJoined: Date.now)
     }
 
     public static func userWith(username: String) -> User {
         if let user: User = swiftForumDB[prefix + username] {
             return user
         } else {
-            return User(username: username, rawRole: UserRole.regular.rawValue, password: "")
+            return User(username: username, rawRole: UserRole.regular.rawValue, password: "", timeJoined: Date.now)
         }
     }
 
