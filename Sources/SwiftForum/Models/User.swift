@@ -24,6 +24,7 @@ public struct User: Codable, Hashable {
     public var lastUpdatedTime: Int?
     public var bio: String?
     public var location: String?
+    public var url: String?
     public var avatar: String?
     public var isSuspended: Bool?
 
@@ -34,6 +35,7 @@ public struct User: Codable, Hashable {
         case lastUpdatedTime = "t"
         case bio
         case location
+        case url
         case avatar
         case isSuspended
     }
