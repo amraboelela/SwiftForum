@@ -46,13 +46,16 @@ open class ForumDB: LevelDB {
         dbPath = NSURL(fileURLWithPath: libraryPath, isDirectory: true).appendingPathComponent(name)?.path ?? ""
         //logger.log("dbPath")
         let weekday = Date().dayOfWeek()
-    #if DEBUG
+        
+#if TwisterWebServer_dev
         dbBackupPath = "/home/amr/backup/TwisterWebServer_dev/" + name + "\(weekday)"
-    #else
+#elseif TwisterWebServer
         dbBackupPath = "/home/amr/backup/TwisterWebServer/" + name + "\(weekday)"
-    #endif
+#else
+        dbBackupPath = dbPath + "\(weekday)"
+#endif
+        logger.log("Database.dbBackupPath: \(dbBackupPath)")
 
-        logger.log("ForumDB.dbBackupPath")
 #elseif os(macOS)
         let libraryDirectory = URL(fileURLWithPath: #file.replacingOccurrences(of: "Sources/SwiftForum/ForumDB.swift", with: ".build/debug/Library"))
         let libraryPath = libraryDirectory.absoluteString
