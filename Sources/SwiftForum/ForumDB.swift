@@ -47,13 +47,7 @@ open class ForumDB: LevelDB {
         //logger.log("dbPath")
         let weekday = Date().dayOfWeek()
         
-#if TwisterWebServer_dev
-        dbBackupPath = "/home/amr/backup/TwisterWebServer_dev/" + name + "\(weekday)"
-#elseif TwisterWebServer
-        dbBackupPath = "/home/amr/backup/TwisterWebServer/" + name + "\(weekday)"
-#else
         dbBackupPath = dbPath + "\(weekday)"
-#endif
         logger.log("Database.dbBackupPath: \(dbBackupPath)")
 
 #elseif os(macOS)
