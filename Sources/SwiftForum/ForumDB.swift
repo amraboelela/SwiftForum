@@ -37,12 +37,11 @@ open class ForumDB: LevelDB {
     // MARK: - Life cycle
     
     public init(name: String) {
-        //let name = "Database"
 #if DEBUG
-        //logger.log("Database DEBUG")
+        //logger.log("ForumDB DEBUG")
 #endif
 #if os(Linux)
-        libraryPath = Database.getLibraryPath()
+        libraryPath = ForumDB.getLibraryPath()
         logger.log("getLibraryPath()")
         dbPath = NSURL(fileURLWithPath: libraryPath, isDirectory: true).appendingPathComponent(name)?.path ?? ""
         //logger.log("dbPath")
@@ -53,9 +52,9 @@ open class ForumDB: LevelDB {
         dbBackupPath = "/home/amr/backup/TwisterWebServer/" + name + "\(weekday)"
     #endif
 
-        logger.log("Database.dbBackupPath")
+        logger.log("ForumDB.dbBackupPath")
 #elseif os(macOS)
-        let libraryDirectory = URL(fileURLWithPath: #file.replacingOccurrences(of: "Sources/SwiftForum/Database.swift", with: ".build/debug/Library"))
+        let libraryDirectory = URL(fileURLWithPath: #file.replacingOccurrences(of: "Sources/SwiftForum/ForumDB.swift", with: ".build/debug/Library"))
         let libraryPath = libraryDirectory.absoluteString
         dbPath = NSURL(fileURLWithPath: libraryPath, isDirectory: true).appendingPathComponent(name)?.path ?? ""
         let weekday = 1
@@ -63,7 +62,7 @@ open class ForumDB: LevelDB {
 #else
         dbPath = NSURL(fileURLWithPath: name).path ?? ""
         if dbPath == "/" + name {
-            libraryPath = Database.getLibraryPath()
+            libraryPath = ForumDB.getLibraryPath()
             dbPath = NSURL(fileURLWithPath: libraryPath, isDirectory: true).appendingPathComponent(name)?.path ?? ""
         }
         let weekday = 1
@@ -76,9 +75,9 @@ open class ForumDB: LevelDB {
         
         //logger.log("after if self.db == nil")
         setupCoders()
-        //logger.log("before Database.lastBackupTime")
+        //logger.log("before ForumDB.lastBackupTime")
         //lastBackupTime = Date.timeIntervalSinceReferenceDate
-        //logger.log("after Database.lastBackupTime")
+        //logger.log("after ForumDB.lastBackupTime")
     }
     
     required public init(path: String, name: String) {
@@ -125,14 +124,14 @@ open class ForumDB: LevelDB {
     
     override open func close() {
         super.close()
-        //Database._instance = nil
+        //ForumDB._instance = nil
     }
     
     public func backupIfNeeded() {
         let currentTime = NSDate.timeIntervalSinceReferenceDate
         //logger.log("BackupInterval: \(BackupInterval)")
         if currentTime - lastBackupTime > BackupInterval {
-            //logger.log("Database backup")
+            //logger.log("ForumDB backup")
             self.lastBackupTime = currentTime
             serialQueue.async {
                 let fileManager = FileManager.default
