@@ -1,5 +1,5 @@
 //
-//  Database.swift
+//  ForumDB.swift
 //  SwiftForum
 //
 //  Created by Amr Aboelela on 1/24/22.
@@ -10,9 +10,9 @@ import Foundation
 import SwiftLevelDB
 import Dispatch
 
-public var forumDB = Database(name: "ForumDB")
+public var forumDB = ForumDB(name: "ForumDB")
 
-open class Database: LevelDB {
+open class ForumDB: LevelDB {
     public var dbPath = ""
 #if os(macOS)
     public var libraryPath: String {

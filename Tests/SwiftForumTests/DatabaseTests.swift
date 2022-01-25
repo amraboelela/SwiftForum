@@ -21,14 +21,14 @@ final class DatabaseTests: XCTestCase {
     }
     
     func testInit() {
-        let database = Database(name: "ForumDB")
-        XCTAssertNotNil(database)
-        XCTAssertNotNil(database.dbPath)
+        let forumDB = ForumDB(name: "ForumDB")
+        XCTAssertNotNil(forumDB)
+        XCTAssertNotNil(forumDB.dbPath)
     }
     
     func testLibraryPath() {
-        let database = Database(name: "ForumDB")
-        database.dbPath = "/path/to/Library/Database"
-        XCTAssertEqual(database.libraryPath, "/path/to/Library")
+        let forumDB = ForumDB(name: "ForumDB")
+        forumDB.dbPath = "/path/to/Library/Database"
+        XCTAssertEqual(forumDB.libraryPath, "/path/to/Library")
     }
 }
