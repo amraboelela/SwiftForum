@@ -61,7 +61,7 @@ public struct User: Codable, Hashable {
     }
 
     public static func userWith(username: String) -> User {
-        if let user: User = swiftForumDB[prefix + username] {
+        if let user: User = forumDB[prefix + username] {
             return user
         } else {
             return User(username: username, rawRole: UserRole.regular.rawValue, password: "", timeJoined: Date.now)
@@ -87,7 +87,7 @@ public struct User: Codable, Hashable {
     // MARK: - Public functions
 
     public static func usernameExists(_ username: String) -> Bool {
-        if let _: User = swiftForumDB[User.prefix + username] {
+        if let _: User = forumDB[User.prefix + username] {
             return true
         } else {
             return false
@@ -96,7 +96,7 @@ public struct User: Codable, Hashable {
     
     public static func users(withUsernamePrefix usernamePrefix: String) -> [User] {
         var result = [User]()
-        swiftForumDB.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix + usernamePrefix) { (key, user: User, stop) in
+        forumDB.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix + usernamePrefix) { (key, user: User, stop) in
             if !(user.isSuspended == true) { //blockedUsernames.contains(user.username) {
                 result.append(user)
             }

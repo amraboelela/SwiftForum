@@ -14,11 +14,11 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/amraboelela/TwisterFoundation.git", .branch("master")),
+        .package(url: "https://github.com/amraboelela/SwiftLevelDB", .branch("master")),
     ],
     targets: [
         .target(name: "SwiftForum", dependencies: [
-            .product(name: "TwisterFoundation", package: "TwisterFoundation"),
+            .product(name: "SwiftLevelDB", package: "SwiftLevelDB"),
         ]),
         .testTarget(name: "SwiftForumTests", dependencies: ["SwiftForum"]),
     ]
