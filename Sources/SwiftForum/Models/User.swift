@@ -16,9 +16,8 @@ public enum UserRole: String {
 
 public struct User: Codable, Hashable {
     public static let prefix = "user-"
-
     public static let avatars = "avatars"
-
+    
     public var username: String
     public var rawRole: String
     public var password: String
