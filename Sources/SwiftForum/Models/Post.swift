@@ -16,6 +16,10 @@ public struct PostReference: Codable {
         case time = "t"
         case username = "u"
     }
+    
+    public static func with(time: Int, username: String) -> PostReference {
+        return PostReference(time: time, username: username)
+    }
 }
 
 public struct Post: Codable {
