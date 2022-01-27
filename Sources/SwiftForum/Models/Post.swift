@@ -8,7 +8,7 @@
 import Foundation
 import SwiftLevelDB
 
-public struct PostReference: Codable {
+/*public struct PostReference: Codable {
     public var time: Int
     public var username: String
     
@@ -20,7 +20,7 @@ public struct PostReference: Codable {
     public static func with(time: Int, username: String) -> PostReference {
         return PostReference(time: time, username: username)
     }
-}
+}*/
 
 public struct Post: Codable {
     public static let prefix = "post-"
@@ -29,9 +29,9 @@ public struct Post: Codable {
     public var time: Int
     public var username: String
     public var message: String
-    public var parentPost: PostReference?
-    public var children: [PostReference]?
-    public var replyTo: PostReference?
+    public var parentPost: String?
+    public var children: [String]?
+    public var replyTo: String?
     public var isClosed: Bool?
     public var isDeleted: Bool?
     public var reportedBy: [String]?
@@ -86,12 +86,11 @@ public struct Post: Codable {
 
     // MARK: - Updating data
     
-    public mutating func addChild(_ childPost: Post) {
+    public mutating func addChild(postKey: String) {
         if children == nil {
-            children = [PostReference]()
+            children = [String]()
         }
-        let postReference = PostReference.with(time: childPost.time, username: childPost.username)
-        children?.append(postReference)
+        children?.append(postKey)
     }
     
     // MARK: - Reading data
