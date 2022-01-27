@@ -79,7 +79,7 @@ public struct Post: Codable {
         children?.append(postKey)
     }
     
-    public func addAndSaveChild(parentPost: Post, username: String, message: String) {
+    public static func addAndSaveChild(parentPost: Post, username: String, message: String) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             var post = Post.with(username: username, message: message)
             var theParentPost = parentPost
