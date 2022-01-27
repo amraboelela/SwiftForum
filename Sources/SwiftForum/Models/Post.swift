@@ -79,6 +79,19 @@ public struct Post: Codable {
         children?.append(postKey)
     }
     
+    public func addAndSaveChild(parentPost: Post, username: String, message: String) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            var post = Post.with(username: username, message: message)
+            var theParentPost = parentPost
+            post.parentPost = theParentPost.key
+            theParentPost.addChild(postKey: post.key)
+            theParentPost.save()
+            post.save()
+            print("saved theParentPost: \(theParentPost)")
+            print("saved post: \(post)")
+        }
+    }
+    
     // MARK: - Reading data
     
     public static func from(key: String) -> Post {
@@ -244,21 +257,21 @@ public struct Post: Codable {
 
     // MARK: - Saving data
     
-    public static func save(post: Post) {
-        var thereAreNewPosts = false
-        let username = post.username
-        let postKey = prefix + "\(post.time)-" + username
-        let userPostKey = UserPost.prefix + post.username + "-\(post.time)"
+    public func save() {
+        //var thereAreNewPosts = false
+        let username = username
+        let postKey = Post.prefix + "\(time)-" + username
+        let userPostKey = UserPost.prefix + username + "-\(time)"
         forumDB[userPostKey] = UserPost(postKey: postKey)
-        forumDB[postKey] = post
-        for hashtag in HashtagOrMention.hashtags(fromText: post.message) {
-            forumDB[hashtag + "-\(post.time)-" + username] = HashtagOrMention(postKey: postKey)
+        forumDB[postKey] = self
+        for hashtag in HashtagOrMention.hashtags(fromText: message) {
+            forumDB[hashtag + "-\(time)-" + username] = HashtagOrMention(postKey: postKey)
         }
-        for mention in HashtagOrMention.mentions(fromText: post.message) {
-            forumDB[mention + "-\(post.time)-" + username] = HashtagOrMention(postKey: postKey)
+        for mention in HashtagOrMention.mentions(fromText: message) {
+            forumDB[mention + "-\(time)-" + username] = HashtagOrMention(postKey: postKey)
         }
-        for word in Word.words(fromText: post.message) {
-            forumDB[Word.prefix + word + "-\(post.time)-" + username] = Word(postKey: postKey)
+        for word in Word.words(fromText: message) {
+            forumDB[Word.prefix + word + "-\(time)-" + username] = Word(postKey: postKey)
         }
     }
     
