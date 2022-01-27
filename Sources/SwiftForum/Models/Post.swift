@@ -30,7 +30,7 @@ public struct Post: Codable {
     public var username: String
     public var message: String
     public var parentPost: PostReference?
-    public var numberOfChildren: Int?
+    public var children: [PostReference]?
     public var replyTo: PostReference?
     public var isClosed: Bool?
     public var isDeleted: Bool?
@@ -84,6 +84,16 @@ public struct Post: Codable {
         return Post(time: Date.now, username: username, message: message)
     }
 
+    // MARK: - Updating data
+    
+    public mutating func addChild(_ childPost: Post) {
+        if children == nil {
+            children = [PostReference]()
+        }
+        let postReference = PostReference.with(time: childPost.time, username: childPost.username)
+        children?.append(postReference)
+    }
+    
     // MARK: - Reading data
     
     public static func from(key: String) -> Post {
