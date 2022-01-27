@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftLevelDB
 
 public struct PostReference: Codable {
     public var time: Int
@@ -73,12 +74,14 @@ public struct Post: Codable {
         return Post.prefix + "\(time)-" + username
     }
 
-    // MARK: - Reading data
+    // MARK: - Creating data
     
-    public static func with(username: String, time: Int) -> Post {
-        return Post(time: time, username: username, message: "")
+    public static func with(username: String, message: String) -> Post {
+        return Post(time: Date.now, username: username, message: message)
     }
 
+    // MARK: - Reading data
+    
     public static func from(key: String) -> Post {
         return Post(time: time(fromPostKey: key) ?? 0, username: username(fromPostKey: key), message: "")
     }
