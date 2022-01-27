@@ -8,20 +8,6 @@
 import Foundation
 import SwiftLevelDB
 
-/*public struct PostReference: Codable {
-    public var time: Int
-    public var username: String
-    
-    public enum CodingKeys: String, CodingKey {
-        case time = "t"
-        case username = "u"
-    }
-    
-    public static func with(time: Int, username: String) -> PostReference {
-        return PostReference(time: time, username: username)
-    }
-}*/
-
 public struct Post: Codable {
     public static let prefix = "post-"
     public static var numberOfReports = 0
@@ -29,12 +15,12 @@ public struct Post: Codable {
     public var time: Int
     public var username: String
     public var message: String
-    public var parentPost: String?
-    public var children: [String]?
-    public var replyTo: String?
+    public var parentPost: String? // parent post key
+    public var children: [String]? // children post keys
+    public var replyTo: String? // reference post key
     public var isClosed: Bool?
     public var isDeleted: Bool?
-    public var reportedBy: [String]?
+    public var reportedBy: [String]? // usernames
     
     public enum CodingKeys: String, CodingKey {
         case time = "t"
