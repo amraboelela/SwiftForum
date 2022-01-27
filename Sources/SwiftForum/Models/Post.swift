@@ -96,13 +96,11 @@ public struct Post: Codable {
     // MARK: - Reading data
     
     public static func from(key: String) -> Post {
-        return Post(time: time(fromPostKey: key) ?? 0, username: username(fromPostKey: key), message: "")
+        return Post(time: time(fromPostKey: key), username: username(fromPostKey: key), message: "")
     }
 
     public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, count: Int) -> [Post] {
-        //let blockedUsers = User.blockedUsers
         var result = [Post]()
-        //let blockedUsernames = blockedUsers.map { $0.username }
         let searchWords = Word.words(fromText: searchText)
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
@@ -293,8 +291,8 @@ public struct Post: Codable {
         return result
     }
     
-    public static func time(fromPostKey postKey: String?) -> Int? {
-        var result: Int?
+    public static func time(fromPostKey postKey: String?) -> Int {
+        var result = 0
         if let postKey = postKey {
             let arr = postKey.components(separatedBy: "-")
             if arr.count > 1 {
