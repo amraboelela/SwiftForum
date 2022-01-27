@@ -261,51 +261,28 @@ public struct Post: Codable {
 
     // MARK: - Saving data
     
-    public static func save(newPost: Post) {
-        let theNewPost = newPost
-        //theNewPost.isNew = true
-        _ = self.save(post: theNewPost)
-    }
-    
-    public static func save(posts: [Post]) -> Int {
-        var saveCount = 0
-        for post in posts {
-            if self.save(post: post) {
-                saveCount+=1;
-            }
+    public static func save(post: Post) {
+        var thereAreNewPosts = false
+        let username = post.username
+        let postKey = prefix + "\(post.time)-" + username
+        let userPostKey = UserPost.prefix + post.username + "-\(post.time)"
+        forumDB[userPostKey] = UserPost(postKey: postKey)
+        forumDB[postKey] = post
+        for hashtag in HashtagOrMention.hashtags(fromText: post.message) {
+            forumDB[hashtag + "-\(post.time)-" + username] = HashtagOrMention(postKey: postKey)
         }
-        return saveCount
+        for mention in HashtagOrMention.mentions(fromText: post.message) {
+            forumDB[mention + "-\(post.time)-" + username] = HashtagOrMention(postKey: postKey)
+        }
+        for word in Word.words(fromText: post.message) {
+            forumDB[Word.prefix + word + "-\(post.time)-" + username] = Word(postKey: postKey)
+        }
     }
     
     // MARK: - Public functions
     
     public static func key(ofPost post: Post) -> String {
         return prefix + "\(post.time)-" + post.username
-    }
-    
-    public static func save(post: Post) -> Bool {
-        var thereAreNewPosts = false
-        let username = post.username
-        let postKey = prefix + "\(post.time)-" + username
-        if let _: Post = forumDB[postKey] {
-        } else {
-            thereAreNewPosts = true
-
-            //logger.log("Saving: post with key: \(postKey)")
-            let userPostKey = UserPost.prefix + post.username + "-\(post.time)" //zeroPaddedPostID(k)
-            forumDB[userPostKey] = UserPost(postKey: postKey)
-            forumDB[postKey] = post
-            for hashtag in HashtagOrMention.hashtags(fromText: post.message) {
-                forumDB[hashtag + "-\(post.time)-" + username] = HashtagOrMention(postKey: postKey)
-            }
-            for mention in HashtagOrMention.mentions(fromText: post.message) {
-                forumDB[mention + "-\(post.time)-" + username] = HashtagOrMention(postKey: postKey)
-            }
-            for word in Word.words(fromText: post.message) {
-                forumDB[Word.prefix + word + "-\(post.time)-" + username] = Word(postKey: postKey)
-            }
-        }
-        return thereAreNewPosts
     }
     
     public static func username(fromPostKey postKey: String) -> String {
