@@ -9,12 +9,12 @@ import Foundation
 
 public struct HashtagOrMention: Codable {
 
-    static var hashtagCharacters = Word.characters.union(CharacterSet(charactersIn: "#"))
-    static var mentionCharacters = Word.characters.union(CharacterSet(charactersIn: "@"))
+    //static var hashtagCharacters = Word.characters.union(CharacterSet(charactersIn: "#"))
+    //static var mentionCharacters = Word.characters.union(CharacterSet(charactersIn: "@"))
 
     public var postKey: String
 
-    public static func hashtags(fromText text: String) -> [String] {
+    /*public static func hashtags(fromText text: String) -> [String] {
         var result = Set<String>()
 
         let words = text.lowercased().components(separatedBy: hashtagCharacters.inverted)
@@ -48,6 +48,6 @@ public struct HashtagOrMention: Codable {
             }
         }
         return Array(result)
-    }
+    }*/
 
 }

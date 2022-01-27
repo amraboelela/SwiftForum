@@ -251,10 +251,10 @@ public struct Post: Codable {
         let userPostKey = UserPost.prefix + username + "-\(time)"
         forumDB[userPostKey] = UserPost(postKey: postKey)
         forumDB[postKey] = self
-        for hashtag in HashtagOrMention.hashtags(fromText: message) {
+        for hashtag in message.hashtags {
             forumDB[hashtag + "-\(time)-" + username] = HashtagOrMention(postKey: postKey)
         }
-        for mention in HashtagOrMention.mentions(fromText: message) {
+        for mention in message.mentions {
             forumDB[mention + "-\(time)-" + username] = HashtagOrMention(postKey: postKey)
         }
         for word in Word.words(fromText: message) {
