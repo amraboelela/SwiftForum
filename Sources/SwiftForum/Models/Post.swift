@@ -79,19 +79,6 @@ public struct Post: Codable {
         children?.append(postKey)
     }
     
-    public static func addAndSaveChild(parentPost: Post, username: String, message: String) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            var post = Post.with(username: username, message: message)
-            var theParentPost = parentPost
-            post.parentPost = theParentPost.key
-            theParentPost.addChild(postKey: post.key)
-            theParentPost.save()
-            post.save()
-            print("saved theParentPost: \(theParentPost)")
-            print("saved post: \(post)")
-        }
-    }
-    
     // MARK: - Reading data
     
     public static func from(key: String) -> Post {
