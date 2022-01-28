@@ -87,7 +87,7 @@ public struct Post: Codable {
         return Post(time: time(fromPostKey: key), username: username(fromPostKey: key), message: "")
     }
 
-    public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, count: Int) -> [Post] {
+    public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, parentsOnly: Bool = false, count: Int) -> [Post] {
         var result = [Post]()
         let searchWords = Word.words(fromText: searchText)
         if let firstWord = searchWords.first {
@@ -118,7 +118,7 @@ public struct Post: Codable {
                         }
                     }
                     if foundTheSearch {
-                        if !(post.isDeleted == true) { //!blockedUsernames.contains(post.username) {
+                        if !(post.isDeleted == true) {
                             result.append(post)
                         }
                     }
@@ -136,8 +136,14 @@ public struct Post: Codable {
             }
             forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
                 if result.count < count {
-                    if !(post.isDeleted == true) { //}!blockedUsernames.contains(post.username) {
-                        result.append(post)
+                    if parentsOnly {
+                        if post.parentPost == nil && !(post.isDeleted == true) {
+                            result.append(post)
+                        }
+                    } else {
+                        if !(post.isDeleted == true) {
+                            result.append(post)
+                        }
                     }
                 } else {
                     stop.pointee = true
@@ -247,7 +253,6 @@ public struct Post: Codable {
     // MARK: - Saving data
     
     public func save() {
-        //let username = username
         let postKey = Post.prefix + "\(time)-" + username
         let userPostKey = UserPost.prefix + username + "-\(time)"
         forumDB[userPostKey] = UserPost(postKey: postKey)
