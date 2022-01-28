@@ -27,9 +27,11 @@ public struct Post: Codable {
         case username = "u"
         case message = "msg"
         case parentPost = "pp"
+        case children
         case replyTo = "rt"
         case isClosed
         case isDeleted
+        case reportedBy
     }
     
     // MARK: - Accessors
@@ -245,8 +247,7 @@ public struct Post: Codable {
     // MARK: - Saving data
     
     public func save() {
-        //var thereAreNewPosts = false
-        let username = username
+        //let username = username
         let postKey = Post.prefix + "\(time)-" + username
         let userPostKey = UserPost.prefix + username + "-\(time)"
         forumDB[userPostKey] = UserPost(postKey: postKey)
