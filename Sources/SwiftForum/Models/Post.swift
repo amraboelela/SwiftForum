@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftLevelDB
-import AppKit
 
 public struct Post: Codable {
     public static let prefix = "post-"
