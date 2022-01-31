@@ -192,13 +192,9 @@ public struct Post: Codable {
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
             forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: Word.prefix + firstWord) { (key, word: Word, stop) in
-                /*if time == nil {
-                 wordPostKeys.append(word.postKey)
-                 } else if let time = time {*/
                 if Word.time(fromKey: key) >= time {
                     wordPostKeys.append(word.postKey)
                 }
-                //}
             }
             for wordPostKey in wordPostKeys {
                 var foundTheSearch = true
@@ -226,7 +222,7 @@ public struct Post: Codable {
             var startAtKey: String? = nil
             startAtKey = Post.prefix + "\(self.time)"
             if let parent = parent {
-                result.append(parent)
+                //result.append(parent)
                 if let childrenKeys = parent.childrenKeys, let childIndex = childrenKeys.firstIndex(of: self.key) {
                     for i in childIndex..<childrenKeys.count {
                         if result.count < count {
