@@ -91,19 +91,19 @@ public struct Post: Codable {
     
     // MARK: - Reading data
     
-    static func from(time: Int, username: String) -> Post? {
+    public static func from(time: Int, username: String) -> Post? {
         let postKey = prefix + "\(time)" + "-" + username
         return from(key: postKey)
     }
     
-    static func from(key: String) -> Post? {
+    public static func from(key: String) -> Post? {
         if let post: Post = forumDB[key] {
             return post
         }
         return nil
     }
 
-    static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, parentsOnly: Bool = false, count: Int) -> [Post] {
+    public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, parentsOnly: Bool = false, count: Int) -> [Post] {
         var result = [Post]()
         let searchWords = Word.words(fromText: searchText)
         if let firstWord = searchWords.first {
@@ -186,7 +186,7 @@ public struct Post: Codable {
     }
 
     // if this post is a child then show parent and siblings starting from current child
-    func childPosts(withSearchText searchText: String, count: Int) -> [Post] {
+    public func childPosts(withSearchText searchText: String, count: Int) -> [Post] {
         var result = [Post]()
         let searchWords = Word.words(fromText: searchText)
         if let firstWord = searchWords.first {
