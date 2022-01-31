@@ -235,7 +235,7 @@ public struct Post: Codable {
                     }
                 }
             } else {
-                result.append(self)
+                //result.append(self)
                 if let childrenKeys = childrenKeys {
                     for childKey in childrenKeys {
                         if result.count < count {
