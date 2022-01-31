@@ -54,7 +54,7 @@ public struct User: Codable, Hashable {
         }
     }
 
-    // MARK: - Static functions
+    // MARK: - Factory methods
     
     public static func createWith(username: String) -> User {
         return User(username: username, rawRole: UserRole.regular.rawValue, password: "", timeJoined: Date.now)

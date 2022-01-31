@@ -73,12 +73,24 @@ public struct Post: Codable {
         return nil
     }
     
-    // MARK: - Creating data
+    // MARK: - Factory methods
     
-    public static func with(username: String, message: String) -> Post {
+    public static func createWith(username: String, message: String) -> Post {
         return Post(time: Date.now, username: username, message: message)
     }
 
+    public static func postWith(time: Int, username: String) -> Post? {
+        let postKey = prefix + "\(time)" + "-" + username
+        return postWith(key: postKey)
+    }
+    
+    public static func postWith(key: String) -> Post? {
+        if let post: Post = forumDB[key] {
+            return post
+        }
+        return nil
+    }
+    
     // MARK: - Updating data
     
     public mutating func addChild(postKey: String) {
@@ -89,18 +101,6 @@ public struct Post: Codable {
     }
     
     // MARK: - Reading data
-    
-    public static func from(time: Int, username: String) -> Post? {
-        let postKey = prefix + "\(time)" + "-" + username
-        return from(key: postKey)
-    }
-    
-    public static func from(key: String) -> Post? {
-        if let post: Post = forumDB[key] {
-            return post
-        }
-        return nil
-    }
 
     public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, parentsOnly: Bool = false, count: Int) -> [Post] {
         var result = [Post]()
@@ -217,15 +217,12 @@ public struct Post: Codable {
                 result.removeLast(result.count - count)
             }
         } else {
-            //logger.log("getPosts, searchText is empty")
-            //var startAtKey: String? = nil
-            //startAtKey = Post.prefix + "\(self.time)"
             if let parent = parent {
                 //result.append(parent)
                 if let childrenKeys = parent.childrenKeys, let childIndex = childrenKeys.firstIndex(of: self.key) {
                     for i in childIndex..<childrenKeys.count {
                         if result.count < count {
-                            if let childPost = Post.from(key: childrenKeys[i]), !(childPost.isDeleted == true) {
+                            if let childPost = Post.postWith(key: childrenKeys[i]), !(childPost.isDeleted == true) {
                                 result.append(childPost)
                             }
                         } else {
@@ -238,7 +235,7 @@ public struct Post: Codable {
                 if let childrenKeys = childrenKeys {
                     for childKey in childrenKeys {
                         if result.count < count {
-                            if let childPost = Post.from(key: childKey), !(childPost.isDeleted == true) {
+                            if let childPost = Post.postWith(key: childKey), !(childPost.isDeleted == true) {
                                 result.append(childPost)
                             }
                         } else {
