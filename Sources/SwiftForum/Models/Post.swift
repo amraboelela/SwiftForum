@@ -219,8 +219,8 @@ public struct Post: Codable {
             }
         } else {
             //logger.log("getPosts, searchText is empty")
-            var startAtKey: String? = nil
-            startAtKey = Post.prefix + "\(self.time)"
+            //var startAtKey: String? = nil
+            //startAtKey = Post.prefix + "\(self.time)"
             if let parent = parent {
                 //result.append(parent)
                 if let childrenKeys = parent.childrenKeys, let childIndex = childrenKeys.firstIndex(of: self.key) {
