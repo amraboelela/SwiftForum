@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftLevelDB
+import AppKit
 
 public struct Post: Codable {
     public static let prefix = "post-"
@@ -15,9 +16,9 @@ public struct Post: Codable {
     public var time: Int
     public var username: String
     public var message: String
-    public var parentPost: String? // parent post key
-    public var children: [String]? // children post keys
-    public var replyTo: String? // reference post key
+    public var parentKey: String?
+    public var childrenKeys: [String]? // children post keys
+    public var replyToPostKey: String? // reference post key
     public var isClosed: Bool?
     public var isDeleted: Bool?
     public var reportedBy: [String]? // usernames
@@ -26,9 +27,9 @@ public struct Post: Codable {
         case time = "t"
         case username = "u"
         case message = "msg"
-        case parentPost = "pp"
-        case children
-        case replyTo = "rt"
+        case parentKey = "pk"
+        case childrenKeys = "ck"
+        case replyToPostKey = "rtpk"
         case isClosed
         case isDeleted
         case reportedBy
@@ -66,6 +67,13 @@ public struct Post: Codable {
         return Post.prefix + "\(time)-" + username
     }
 
+    var parent: Post? {
+        if let parentKey = parentKey, let post: Post = forumDB[parentKey] {
+            return post
+        }
+        return nil
+    }
+    
     // MARK: - Creating data
     
     public static func with(username: String, message: String) -> Post {
@@ -75,19 +83,30 @@ public struct Post: Codable {
     // MARK: - Updating data
     
     public mutating func addChild(postKey: String) {
-        if children == nil {
-            children = [String]()
+        if childrenKeys == nil {
+            childrenKeys = [String]()
         }
-        children?.append(postKey)
+        childrenKeys?.append(postKey)
     }
     
     // MARK: - Reading data
     
-    public static func from(key: String) -> Post {
-        return Post(time: time(fromPostKey: key), username: username(fromPostKey: key), message: "")
+    static func from(time: Int, username: String) -> Post? {
+        let postKey = prefix + "\(time)" + "-" + username
+        if let post: Post = forumDB[postKey] {
+            return post
+        }
+        return nil
+    }
+    
+    static func from(key: String) -> Post? {
+        if let post: Post = forumDB[key] {
+            return post
+        }
+        return nil
     }
 
-    public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, parentsOnly: Bool = false, count: Int) -> [Post] {
+    static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, parentsOnly: Bool = false, count: Int) -> [Post] {
         var result = [Post]()
         let searchWords = Word.words(fromText: searchText)
         if let firstWord = searchWords.first {
@@ -134,25 +153,112 @@ public struct Post: Codable {
             if let time = time {
                 startAtKey = prefix + "\(time)"
             }
-            forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
-                if result.count < count {
-                    if parentsOnly {
-                        if post.parentPost == nil && !(post.isDeleted == true) {
+            if parentsOnly {
+                var parentsKeys = [String]()
+                forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
+                    if parentsKeys.count < count {
+                        if !(post.isDeleted == true) && !(post.parent?.isDeleted == true) {
+                            let parentKey = post.parentKey ?? post.key
+                            if !parentsKeys.contains(parentKey) {
+                                parentsKeys.append(parentKey)
+                            }
+                        }
+                    } else {
+                        stop.pointee = true
+                    }
+                }
+                for parentKey in parentsKeys {
+                    if let post: Post = forumDB[parentKey] {
+                        result.append(post)
+                    }
+                }
+            } else {
+                forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
+                    if result.count < count {
+                        if !(post.isDeleted == true) {
                             result.append(post)
                         }
                     } else {
+                        stop.pointee = true
+                    }
+                }
+            }
+            
+        }
+        return result
+    }
+
+    // if this post is a child then show parent and siblings starting from current child
+    func childPosts(withSearchText searchText: String, count: Int) -> [Post] {
+        var result = [Post]()
+        let searchWords = Word.words(fromText: searchText)
+        if let firstWord = searchWords.first {
+            var wordPostKeys = [String]()
+            forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: Word.prefix + firstWord) { (key, word: Word, stop) in
+                /*if time == nil {
+                 wordPostKeys.append(word.postKey)
+                 } else if let time = time {*/
+                if Word.time(fromKey: key) >= time {
+                    wordPostKeys.append(word.postKey)
+                }
+                //}
+            }
+            for wordPostKey in wordPostKeys {
+                var foundTheSearch = true
+                if let post: Post = forumDB[wordPostKey] {
+                    for i in 1..<searchWords.count {
+                        let searchWord = searchWords[i]
+                        if post.message.lowercased().range(of: searchWord) == nil {
+                            foundTheSearch = false
+                            break
+                        }
+                    }
+                    if foundTheSearch {
                         if !(post.isDeleted == true) {
                             result.append(post)
                         }
                     }
-                } else {
-                    stop.pointee = true
+                }
+            }
+            result = result.sorted { $0.time > $1.time }
+            if result.count > count {
+                result.removeLast(result.count - count)
+            }
+        } else {
+            //logger.log("getPosts, searchText is empty")
+            var startAtKey: String? = nil
+            startAtKey = Post.prefix + "\(self.time)"
+            if let parent = parent {
+                result.append(parent)
+                if let childrenKeys = parent.childrenKeys, let childIndex = childrenKeys.firstIndex(of: self.key) {
+                    for i in childIndex..<childrenKeys.count {
+                        if result.count < count {
+                            if let childPost = Post.from(key: childrenKeys[i]), !(childPost.isDeleted == true) {
+                                result.append(childPost)
+                            }
+                        } else {
+                            break
+                        }
+                    }
+                }
+            } else {
+                result.append(self)
+                if let childrenKeys = childrenKeys {
+                    for childKey in childrenKeys {
+                        if result.count < count {
+                            if let childPost = Post.from(key: childKey), !(childPost.isDeleted == true) {
+                                result.append(childPost)
+                            }
+                        } else {
+                            break
+                        }
+                    }
                 }
             }
         }
         return result
     }
-
+    
     public static func posts(withHashtagOrMention hashtagOrMention: String, searchText: String? = nil, beforePostTime: Int? = nil, count: Int) -> [Post] {
         var result = [Post]()
         
@@ -206,15 +312,15 @@ public struct Post: Codable {
         return result
     }
 
-    public static func posts(forUsername username: String, searchText: String = "", beforePostID: String? = nil, count: Int) -> [Post] {
+    public static func posts(forUsername username: String, searchText: String = "", count: Int) -> [Post] {
         var result = [Post]()
         var postKeys = [String]()
         var postKeySet = Set<String>()
         if searchText == "" {
             var startingAtKey: String? = nil
-            if let beforePostID = beforePostID {
+            /*if let beforePostID = beforePostID {
                 startingAtKey = UserPost.prefix + username + "-" + beforePostID
-            }
+            }*/
             forumDB.enumerateKeysAndValues(backward: true, startingAtKey: startingAtKey, andPrefix: UserPost.prefix + username + "-") { (key, userPost: UserPost, stop) in
                 if postKeys.count < count {
                     if !postKeySet.contains(userPost.postKey) {

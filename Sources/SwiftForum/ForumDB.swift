@@ -99,21 +99,11 @@ open class ForumDB: LevelDB {
             backupIfNeeded()
         }
         self.encoder = {(key: String, value: Data) -> Data? in
-            do {
-                let data = value
-                return data
-            } catch {
-                logger.log("Problem encoding data: \(error)")
-                return nil
-            }
+            let data = value
+            return data
         }
         self.decoder = {(key: String, data: Data) -> Data? in
-            do {
-                return data
-            } catch {
-                logger.log("Problem decoding data: \(data.simpleDescription) key: \(key) error: \(error)")
-                return nil
-            }
+            return data
         }
     }
     
@@ -121,7 +111,6 @@ open class ForumDB: LevelDB {
     
     override open func close() {
         super.close()
-        //ForumDB._instance = nil
     }
     
     public func backupIfNeeded() {
