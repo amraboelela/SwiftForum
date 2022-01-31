@@ -93,10 +93,7 @@ public struct Post: Codable {
     
     static func from(time: Int, username: String) -> Post? {
         let postKey = prefix + "\(time)" + "-" + username
-        if let post: Post = forumDB[postKey] {
-            return post
-        }
-        return nil
+        return from(key: postKey)
     }
     
     static func from(key: String) -> Post? {
