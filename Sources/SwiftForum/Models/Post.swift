@@ -97,7 +97,9 @@ public struct Post: Codable {
         if childrenKeys == nil {
             childrenKeys = [String]()
         }
-        childrenKeys?.append(postKey)
+        if childrenKeys?.contains(postKey) == false {
+            childrenKeys?.append(postKey)
+        }
     }
     
     // MARK: - Reading data

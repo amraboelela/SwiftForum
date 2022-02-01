@@ -64,7 +64,7 @@ public struct User: Codable, Hashable {
         if let user: User = forumDB[prefix + username] {
             return user
         } else {
-            return User(username: username, rawRole: UserRole.regular.rawValue, password: "", timeJoined: Date.now)
+            return createWith(username: username)
         }
     }
 
