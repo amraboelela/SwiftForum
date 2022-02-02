@@ -22,6 +22,7 @@ public struct User: Codable, Hashable {
     public var rawRole: String
     public var password: String
     public var timeJoined: Int
+    public var fullName: String?
     public var bio: String?
     public var location: String?
     public var url: String?
@@ -33,6 +34,7 @@ public struct User: Codable, Hashable {
         case rawRole = "r"
         case password = "p"
         case timeJoined = "t"
+        case fullName
         case bio
         case location
         case url
