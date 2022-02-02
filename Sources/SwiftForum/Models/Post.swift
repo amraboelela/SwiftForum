@@ -66,7 +66,7 @@ public struct Post: Codable {
         return Post.prefix + "\(time)-" + username
     }
 
-    var parent: Post? {
+    public var parent: Post? {
         if let parentKey = parentKey, let post: Post = forumDB[parentKey] {
             return post
         }
