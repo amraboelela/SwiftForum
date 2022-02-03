@@ -29,7 +29,7 @@ public struct User: Codable, Hashable {
     public var avatar: String?
     public var isSuspended: Bool?
 
-    enum CodingKeys : String, CodingKey {
+    /*enum CodingKeys : String, CodingKey {
         case username = "u"
         case rawRole = "r"
         case password = "p"
@@ -40,7 +40,7 @@ public struct User: Codable, Hashable {
         case url
         case avatar
         case isSuspended
-    }
+    }*/
 
     // MARK: - Accessors
 
