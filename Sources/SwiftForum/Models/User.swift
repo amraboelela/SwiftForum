@@ -19,9 +19,9 @@ public struct User: Codable, Hashable {
     public static let avatars = "avatars"
     
     public var username: String
-    public var rawRole: String
     public var password: String
-    public var timeJoined: Int
+    public var rawRole: String?
+    public var timeJoined: Int?
     public var fullName: String?
     public var bio: String?
     public var location: String?
