@@ -22,6 +22,7 @@ public struct Post: Codable {
     public var isDeleted: Bool?
     public var reportedBy: [String]? // usernames
     
+    
     /*public enum CodingKeys: String, CodingKey {
         case time = "t"
         case username = "u"
