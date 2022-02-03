@@ -187,7 +187,7 @@ public struct Post: Codable {
     }
 
     // if this post is a child then show parent and siblings starting from current child
-    public func childPosts(withSearchText searchText: String, count: Int) -> [Post] {
+    public func childPosts(withSearchText searchText: String, count: Int, before: Bool = false) -> [Post] {
         var result = [Post]()
         let searchWords = Word.words(fromText: searchText)
         if let firstWord = searchWords.first {
@@ -220,20 +220,31 @@ public struct Post: Codable {
             }
         } else {
             if let parent = parent {
-                //result.append(parent)
                 if let childrenKeys = parent.childrenKeys, let childIndex = childrenKeys.firstIndex(of: self.key) {
-                    for i in childIndex..<childrenKeys.count {
-                        if result.count < count {
-                            if let childPost = Post.postWith(key: childrenKeys[i]), !(childPost.isDeleted == true) {
-                                result.append(childPost)
+                    if before {
+                        let firstIndex = (childIndex - count > 0) ? childIndex - count : 0
+                        for i in firstIndex..<childrenKeys.count {
+                            if result.count < count {
+                                if let childPost = Post.postWith(key: childrenKeys[i]), !(childPost.isDeleted == true) {
+                                    result.append(childPost)
+                                }
+                            } else {
+                                break
                             }
-                        } else {
-                            break
+                        }
+                    } else {
+                        for i in childIndex..<childrenKeys.count {
+                            if result.count < count {
+                                if let childPost = Post.postWith(key: childrenKeys[i]), !(childPost.isDeleted == true) {
+                                    result.append(childPost)
+                                }
+                            } else {
+                                break
+                            }
                         }
                     }
                 }
             } else {
-                //result.append(self)
                 if let childrenKeys = childrenKeys {
                     for childKey in childrenKeys {
                         if result.count < count {
