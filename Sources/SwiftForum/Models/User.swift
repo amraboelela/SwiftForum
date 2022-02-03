@@ -20,7 +20,7 @@ public struct User: Codable, Hashable {
     
     public var username: String
     public var password: String
-    public var rawRole: String?
+    public var role: String?
     public var timeJoined: Int?
     public var fullName: String?
     public var bio: String?
@@ -44,22 +44,22 @@ public struct User: Codable, Hashable {
 
     // MARK: - Accessors
 
-    public var role: UserRole {
+    public var userRole: UserRole {
         get {
-            if let result = UserRole(rawValue:rawRole) {
+            if let role = role, let result = UserRole(rawValue:role) {
                 return result
             }
             return .regular
         }
         set {
-            self.rawRole = newValue.rawValue
+            self.role = newValue.rawValue
         }
     }
 
     // MARK: - Factory methods
     
     public static func createWith(username: String) -> User {
-        return User(username: username, rawRole: UserRole.regular.rawValue, password: "", timeJoined: Date.now)
+        return User(username: username, password: "", timeJoined: Date.now)
     }
 
     public static func userWith(username: String) -> User {
