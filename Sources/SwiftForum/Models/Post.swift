@@ -22,7 +22,7 @@ public struct Post: Codable {
     public var isDeleted: Bool?
     public var reportedBy: [String]? // usernames
     
-    public enum CodingKeys: String, CodingKey {
+    /*public enum CodingKeys: String, CodingKey {
         case time = "t"
         case username = "u"
         case message = "msg"
@@ -32,7 +32,7 @@ public struct Post: Codable {
         case isClosed
         case isDeleted
         case reportedBy
-    }
+    }*/
     
     // MARK: - Accessors
     
