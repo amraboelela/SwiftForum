@@ -9,7 +9,7 @@ import Foundation
 import SwiftLevelDB
 
 public enum UserRole: String {
-    case regular
+    case member
     case moderator
     case admin
 }
@@ -36,7 +36,7 @@ public struct User: Codable, Hashable {
             if let role = role, let result = UserRole(rawValue:role) {
                 return result
             }
-            return .regular
+            return .member
         }
         set {
             self.role = newValue.rawValue
