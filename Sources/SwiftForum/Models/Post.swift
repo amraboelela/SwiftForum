@@ -15,7 +15,7 @@ public struct Post: Codable {
     public var time: Int
     public var username: String
     public var message: String
-    public var parentKey: String?
+    public var parent: String? // parent key
     public var children: [String]? // children post keys
     public var replyTo: String? // reply to post key
     public var closed: Bool?
@@ -53,8 +53,8 @@ public struct Post: Codable {
         return Post.prefix + "\(time)-" + username
     }
 
-    public var parent: Post? {
-        if let parentKey = parentKey, let post: Post = forumDB[parentKey] {
+    public var parentPost: Post? {
+        if let parentKey = parent, let post: Post = forumDB[parentKey] {
             return post
         }
         return nil
@@ -143,7 +143,7 @@ public struct Post: Codable {
                 forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
                     if parentsKeys.count < count {
                         //if !(post.isDeleted == true) && !(post.parent?.isDeleted == true) {
-                        let parentKey = post.parentKey ?? post.key
+                        let parentKey = post.parent ?? post.key
                         if !parentsKeys.contains(parentKey) {
                             parentsKeys.append(parentKey)
                         }
@@ -217,8 +217,8 @@ public struct Post: Codable {
     // if this post is a child then show parent and siblings starting from current child
     private func childPosts(count: Int, before: Bool = false) -> [Post] {
         var result = [Post]()
-        if let parent = parent {
-            if let childrenKeys = parent.children, let childIndex = childrenKeys.firstIndex(of: self.key) {
+        if let parentPost = parentPost {
+            if let childrenKeys = parentPost.children, let childIndex = childrenKeys.firstIndex(of: self.key) {
                 if before {
                     let firstIndex = (childIndex - count > 0) ? childIndex - count : 0
                     for i in firstIndex..<childrenKeys.count {
