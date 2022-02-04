@@ -19,7 +19,7 @@ public struct Post: Codable {
     public var childrenKeys: [String]? // children post keys
     public var replyToPostKey: String?
     public var isClosed: Bool?
-    public var isDeleted: Bool?
+    //public var isDeleted: Bool?
     public var reportedBy: [String]? // usernames
     
     // MARK: - Accessors
@@ -123,9 +123,9 @@ public struct Post: Codable {
                         }
                     }
                     if foundTheSearch {
-                        if !(post.isDeleted == true) {
-                            result.append(post)
-                        }
+                        //if !(post.isDeleted == true) {
+                        result.append(post)
+                        //}
                     }
                 }
             }
@@ -143,12 +143,12 @@ public struct Post: Codable {
                 var parentsKeys = [String]()
                 forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
                     if parentsKeys.count < count {
-                        if !(post.isDeleted == true) && !(post.parent?.isDeleted == true) {
-                            let parentKey = post.parentKey ?? post.key
-                            if !parentsKeys.contains(parentKey) {
-                                parentsKeys.append(parentKey)
-                            }
+                        //if !(post.isDeleted == true) && !(post.parent?.isDeleted == true) {
+                        let parentKey = post.parentKey ?? post.key
+                        if !parentsKeys.contains(parentKey) {
+                            parentsKeys.append(parentKey)
                         }
+                        //}
                     } else {
                         stop.pointee = true
                     }
@@ -161,9 +161,9 @@ public struct Post: Codable {
             } else {
                 forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
                     if result.count < count {
-                        if !(post.isDeleted == true) {
-                            result.append(post)
-                        }
+                        //if !(post.isDeleted == true) {
+                        result.append(post)
+                        //}
                     } else {
                         stop.pointee = true
                     }
@@ -182,9 +182,9 @@ public struct Post: Codable {
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
             forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: Word.prefix + firstWord) { (key, word: Word, stop) in
-                if Word.time(fromKey: key) >= time {
-                    wordPostKeys.append(word.postKey)
-                }
+                //if Word.time(fromKey: key) >= time {
+                wordPostKeys.append(word.postKey)
+                //}
             }
             for wordPostKey in wordPostKeys {
                 var foundTheSearch = true
@@ -197,18 +197,18 @@ public struct Post: Codable {
                         }
                     }
                     if foundTheSearch {
-                        if !(post.isDeleted == true) {
-                            result.append(post)
-                        }
+                        //if !(post.isDeleted == true) {
+                        result.append(post)
+                        //}
                     }
                 }
             }
             result = result.sorted { $0.time > $1.time }
+            let childPostsKeys = theChildPosts.map { $0.key }
+            result = result.filter { childPostsKeys.contains($0.key) }
             if result.count > count {
                 result.removeLast(result.count - count)
             }
-            let childPostsKeys = theChildPosts.map { $0.key }
-            result = result.filter { childPostsKeys.contains($0.key) }
         } else {
             return theChildPosts
         }
@@ -224,7 +224,7 @@ public struct Post: Codable {
                     let firstIndex = (childIndex - count > 0) ? childIndex - count : 0
                     for i in firstIndex..<childrenKeys.count {
                         if result.count < count {
-                            if let childPost = Post.postWith(key: childrenKeys[i]), !(childPost.isDeleted == true) {
+                            if let childPost = Post.postWith(key: childrenKeys[i]) {
                                 result.append(childPost)
                             }
                         } else {
@@ -234,7 +234,7 @@ public struct Post: Codable {
                 } else {
                     for i in childIndex..<childrenKeys.count {
                         if result.count < count {
-                            if let childPost = Post.postWith(key: childrenKeys[i]), !(childPost.isDeleted == true) {
+                            if let childPost = Post.postWith(key: childrenKeys[i]) {
                                 result.append(childPost)
                             }
                         } else {
@@ -247,7 +247,7 @@ public struct Post: Codable {
             if let childrenKeys = childrenKeys {
                 for childKey in childrenKeys {
                     if result.count < count {
-                        if let childPost = Post.postWith(key: childKey), !(childPost.isDeleted == true) {
+                        if let childPost = Post.postWith(key: childKey) {
                             result.append(childPost)
                         }
                     } else {
