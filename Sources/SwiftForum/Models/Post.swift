@@ -60,6 +60,10 @@ public struct Post: Codable {
         return nil
     }
     
+    public var friendlyDateString: String {
+        return Date.friendlyDateStringFrom(epochTime: TimeInterval(time))
+    }
+    
     // MARK: - Factory methods
     
     public static func createWith(username: String, message: String) -> Post {

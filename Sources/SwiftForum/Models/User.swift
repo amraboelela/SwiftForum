@@ -51,6 +51,10 @@ public struct User: Codable, Hashable {
         return result
     }
 
+    public var friendlyDateString: String {
+        return Date.friendlyDateStringFrom(epochTime: TimeInterval(time))
+    }
+    
     // MARK: - Factory methods
     
     public static func createWith(username: String) -> User {
