@@ -175,9 +175,10 @@ public struct Post: Codable {
     }
 
     // if this post is a child then show parent and siblings starting from current child
-    public func childPosts(withSearchText searchText: String, count: Int, before: Bool = false) -> [Post] {
+    public func childPosts(withSearchText searchText: String? = nil, count: Int, before: Bool = false) -> [Post] {
         var result = [Post]()
-        let searchWords = Word.words(fromText: searchText)
+        let theChildPosts = childPosts(count: count, before: before)
+        let searchWords = Word.words(fromText: searchText ?? "")
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
             forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: Word.prefix + firstWord) { (key, word: Word, stop) in
@@ -206,42 +207,51 @@ public struct Post: Codable {
             if result.count > count {
                 result.removeLast(result.count - count)
             }
+            let childPostsKeys = theChildPosts.map { $0.key }
+            result = result.filter { childPostsKeys.contains($0.key) }
         } else {
-            if let parent = parent {
-                if let childrenKeys = parent.childrenKeys, let childIndex = childrenKeys.firstIndex(of: self.key) {
-                    if before {
-                        let firstIndex = (childIndex - count > 0) ? childIndex - count : 0
-                        for i in firstIndex..<childrenKeys.count {
-                            if result.count < count {
-                                if let childPost = Post.postWith(key: childrenKeys[i]), !(childPost.isDeleted == true) {
-                                    result.append(childPost)
-                                }
-                            } else {
-                                break
-                            }
-                        }
-                    } else {
-                        for i in childIndex..<childrenKeys.count {
-                            if result.count < count {
-                                if let childPost = Post.postWith(key: childrenKeys[i]), !(childPost.isDeleted == true) {
-                                    result.append(childPost)
-                                }
-                            } else {
-                                break
-                            }
-                        }
-                    }
-                }
-            } else {
-                if let childrenKeys = childrenKeys {
-                    for childKey in childrenKeys {
+            return theChildPosts
+        }
+        return result
+    }
+    
+    // if this post is a child then show parent and siblings starting from current child
+    private func childPosts(count: Int, before: Bool = false) -> [Post] {
+        var result = [Post]()
+        if let parent = parent {
+            if let childrenKeys = parent.childrenKeys, let childIndex = childrenKeys.firstIndex(of: self.key) {
+                if before {
+                    let firstIndex = (childIndex - count > 0) ? childIndex - count : 0
+                    for i in firstIndex..<childrenKeys.count {
                         if result.count < count {
-                            if let childPost = Post.postWith(key: childKey), !(childPost.isDeleted == true) {
+                            if let childPost = Post.postWith(key: childrenKeys[i]), !(childPost.isDeleted == true) {
                                 result.append(childPost)
                             }
                         } else {
                             break
                         }
+                    }
+                } else {
+                    for i in childIndex..<childrenKeys.count {
+                        if result.count < count {
+                            if let childPost = Post.postWith(key: childrenKeys[i]), !(childPost.isDeleted == true) {
+                                result.append(childPost)
+                            }
+                        } else {
+                            break
+                        }
+                    }
+                }
+            }
+        } else {
+            if let childrenKeys = childrenKeys {
+                for childKey in childrenKeys {
+                    if result.count < count {
+                        if let childPost = Post.postWith(key: childKey), !(childPost.isDeleted == true) {
+                            result.append(childPost)
+                        }
+                    } else {
+                        break
                     }
                 }
             }
