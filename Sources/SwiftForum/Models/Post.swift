@@ -16,10 +16,9 @@ public struct Post: Codable {
     public var username: String
     public var message: String
     public var parentKey: String?
-    public var childrenKeys: [String]? // children post keys
-    public var replyToPostKey: String?
-    public var isClosed: Bool?
-    //public var isDeleted: Bool?
+    public var children: [String]? // children post keys
+    public var replyTo: String? // reply to post key
+    public var closed: Bool?
     public var reportedBy: [String]? // usernames
     
     // MARK: - Accessors
@@ -82,11 +81,11 @@ public struct Post: Codable {
     // MARK: - Updating data
     
     public mutating func addChild(postKey: String) {
-        if childrenKeys == nil {
-            childrenKeys = [String]()
+        if children == nil {
+            children = [String]()
         }
-        if childrenKeys?.contains(postKey) == false {
-            childrenKeys?.append(postKey)
+        if children?.contains(postKey) == false {
+            children?.append(postKey)
         }
     }
     
@@ -219,7 +218,7 @@ public struct Post: Codable {
     private func childPosts(count: Int, before: Bool = false) -> [Post] {
         var result = [Post]()
         if let parent = parent {
-            if let childrenKeys = parent.childrenKeys, let childIndex = childrenKeys.firstIndex(of: self.key) {
+            if let childrenKeys = parent.children, let childIndex = childrenKeys.firstIndex(of: self.key) {
                 if before {
                     let firstIndex = (childIndex - count > 0) ? childIndex - count : 0
                     for i in firstIndex..<childrenKeys.count {
@@ -244,7 +243,7 @@ public struct Post: Codable {
                 }
             }
         } else {
-            if let childrenKeys = childrenKeys {
+            if let childrenKeys = children {
                 for childKey in childrenKeys {
                     if result.count < count {
                         if let childPost = Post.postWith(key: childKey) {

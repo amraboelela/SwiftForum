@@ -21,13 +21,13 @@ public struct User: Codable, Hashable {
     public var username: String
     public var password: String
     public var role: String?
-    public var timeJoined: Int
+    public var time: Int // time joined
     public var fullName: String?
     public var bio: String?
     public var location: String?
     public var url: String?
     public var avatar: String?
-    public var isSuspended: Bool?
+    public var suspended: Bool?
 
     // MARK: - Accessors
 
@@ -46,7 +46,7 @@ public struct User: Codable, Hashable {
     // MARK: - Factory methods
     
     public static func createWith(username: String) -> User {
-        return User(username: username, password: "", timeJoined: Date.now)
+        return User(username: username, password: "", time: Date.now)
     }
 
     public static func userWith(username: String) -> User {
@@ -86,7 +86,7 @@ public struct User: Codable, Hashable {
     public static func users(withUsernamePrefix usernamePrefix: String) -> [User] {
         var result = [User]()
         forumDB.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix + usernamePrefix) { (key, user: User, stop) in
-            if !(user.isSuspended == true) { //blockedUsernames.contains(user.username) {
+            if !(user.suspended == true) {
                 result.append(user)
             }
         }
