@@ -21,7 +21,7 @@ public struct User: Codable, Hashable {
     public var username: String
     public var password: String
     public var role: String?
-    public var timeJoined: Int?
+    public var timeJoined: Int
     public var fullName: String?
     public var bio: String?
     public var location: String?
