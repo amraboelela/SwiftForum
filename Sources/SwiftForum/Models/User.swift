@@ -22,7 +22,7 @@ public struct User: Codable, Hashable {
     public var password: String
     public var role: String?
     public var time: Int // time joined
-    public var fullName: String?
+    public var fullname: String?
     public var bio: String?
     public var location: String?
     public var url: String?
@@ -41,6 +41,14 @@ public struct User: Codable, Hashable {
         set {
             self.role = newValue.rawValue
         }
+    }
+    
+    public var userFullname: String {
+        var result = fullname ?? ""
+        if result.isVacant {
+            result = username
+        }
+        return result
     }
 
     // MARK: - Factory methods
