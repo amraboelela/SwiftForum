@@ -17,23 +17,10 @@ public struct Post: Codable {
     public var message: String
     public var parentKey: String?
     public var childrenKeys: [String]? // children post keys
-    public var replyToPostKey: String? // reference post key
+    public var replyToPostKey: String?
     public var isClosed: Bool?
     public var isDeleted: Bool?
     public var reportedBy: [String]? // usernames
-    
-    
-    /*public enum CodingKeys: String, CodingKey {
-        case time = "t"
-        case username = "u"
-        case message = "msg"
-        case parentKey = "pk"
-        case childrenKeys = "ck"
-        case replyToPostKey = "rtpk"
-        case isClosed
-        case isDeleted
-        case reportedBy
-    }*/
     
     // MARK: - Accessors
     
@@ -320,11 +307,11 @@ public struct Post: Codable {
         var postKeys = [String]()
         var postKeySet = Set<String>()
         if searchText == "" {
-            var startingAtKey: String? = nil
+            //var startingAtKey: String? = nil
             /*if let beforePostID = beforePostID {
                 startingAtKey = UserPost.prefix + username + "-" + beforePostID
             }*/
-            forumDB.enumerateKeysAndValues(backward: true, startingAtKey: startingAtKey, andPrefix: UserPost.prefix + username + "-") { (key, userPost: UserPost, stop) in
+            forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: UserPost.prefix + username + "-") { (key, userPost: UserPost, stop) in
                 if postKeys.count < count {
                     if !postKeySet.contains(userPost.postKey) {
                         postKeySet.insert(userPost.postKey)

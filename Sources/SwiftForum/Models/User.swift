@@ -29,19 +29,6 @@ public struct User: Codable, Hashable {
     public var avatar: String?
     public var isSuspended: Bool?
 
-    /*enum CodingKeys : String, CodingKey {
-        case username = "u"
-        case rawRole = "r"
-        case password = "p"
-        case timeJoined = "t"
-        case fullName
-        case bio
-        case location
-        case url
-        case avatar
-        case isSuspended
-    }*/
-
     // MARK: - Accessors
 
     public var userRole: UserRole {
