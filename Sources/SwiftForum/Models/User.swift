@@ -20,8 +20,8 @@ public struct User: Codable, Hashable {
     
     public var username: String
     public var password: String
-    public var timeJoined: Int
     public var role: String?
+    public var timeJoined: Int
     public var timeLoggedin: Int?
     public var fullname: String?
     public var bio: String?
