@@ -44,6 +44,18 @@ public struct User: Codable, Hashable {
         }
     }
     
+    public var arabicUserRole: UserRole {
+        let userRole = self.userRole
+        switch userRole {
+        case .member:
+            return "عضو"
+        case .moderator:
+            return "مشرف"
+        case .admin:
+            return "إداري"
+        }
+    }
+    
     public var userFullname: String {
         var result = fullname ?? ""
         if result.isVacant {
