@@ -44,7 +44,7 @@ public struct User: Codable, Hashable {
         }
     }
     
-    public var arabicUserRole: UserRole {
+    public var arabicUserRole: String {
         let userRole = self.userRole
         switch userRole {
         case .member:
