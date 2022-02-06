@@ -60,7 +60,7 @@ public struct Post: Codable {
         return nil
     }
     
-    public var friendlyDateString: String {
+    public var postDate: String {
         return Date.friendlyDateStringFrom(epochTime: TimeInterval(time))
     }
     

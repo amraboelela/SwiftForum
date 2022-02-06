@@ -20,8 +20,9 @@ public struct User: Codable, Hashable {
     
     public var username: String
     public var password: String
+    public var timeJoined: Int
     public var role: String?
-    public var time: Int // time joined
+    public var timeLoggedin: Int?
     public var fullname: String?
     public var bio: String?
     public var location: String?
@@ -51,14 +52,22 @@ public struct User: Codable, Hashable {
         return result
     }
 
-    public var friendlyDateString: String {
-        return Date.friendlyDateStringFrom(epochTime: TimeInterval(time))
+    public var joinedDate: String {
+        return Date.friendlyDateStringFrom(epochTime: TimeInterval(timeJoined))
+    }
+    
+    public var loggedinDate: String {
+        if let timeLoggedin = timeLoggedin {
+            return Date.friendlyDateStringFrom(epochTime: TimeInterval(timeLoggedin))
+        } else {
+            return ""
+        }
     }
     
     // MARK: - Factory methods
     
     public static func createWith(username: String) -> User {
-        return User(username: username, password: "", time: Date.now)
+        return User(username: username, password: "", timeJoined: Date.now)
     }
 
     public static func userWith(username: String) -> User {
