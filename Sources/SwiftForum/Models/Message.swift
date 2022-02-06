@@ -70,7 +70,7 @@ public struct Message: Codable {
         forumDB[messageKey] = self
     }
     
-    // MARK: - Public functions
+    // MARK: - Convenience methods
     
     public static func key(ofMessage message: Message) -> String {
         return prefix + message.toUsername +  "-\(message.timeSent)-" + message.fromUsername
@@ -104,6 +104,20 @@ public struct Message: Codable {
             }
         }
         return result
+    }
+    
+    // MARK: - Util methods
+    
+    public static func deleteReadMessages() {
+        var keysToBeDeleted = [String]()
+        forumDB.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix) { (key, message: Message, stop) in
+            if let timeRead = message.timeRead, Date.now - timeRead > Int(Date.oneDay) {
+                keysToBeDeleted.append(key)
+            }
+        }
+        for keyToBeDeleted in keysToBeDeleted {
+            forumDB.removeValueForKey(keyToBeDeleted)
+        }
     }
     
 }
