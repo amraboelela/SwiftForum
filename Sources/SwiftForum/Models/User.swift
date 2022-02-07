@@ -82,11 +82,11 @@ public struct User: Codable, Hashable {
         return User(username: username, password: "", timeJoined: Date.now)
     }
 
-    public static func userWith(username: String) -> User {
+    public static func userWith(username: String) -> User? {
         if let user: User = forumDB[prefix + username] {
             return user
         } else {
-            return createWith(username: username)
+            return nil //createWith(username: username)
         }
     }
 
