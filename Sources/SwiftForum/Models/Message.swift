@@ -12,9 +12,9 @@ public struct Message: Codable {
     public static let prefix = "message-"
 
     public var toUsername: String
-    public var timeSent: Int
     public var fromUsername: String
     public var message: String
+    public var timeSent: Int
     public var timeRead: Int?
     
     // MARK: - Accessors
@@ -25,6 +25,10 @@ public struct Message: Codable {
     
     public var sentDate: String {
         return Date.friendlyDateStringFrom(epochTime: TimeInterval(timeSent))
+    }
+    
+    public var readDate: String {
+        return Date.friendlyDateStringFrom(epochTime: TimeInterval(timeRead))
     }
     
     // MARK: - Factory methods
