@@ -55,13 +55,9 @@ public struct Message: Codable {
     
     // MARK: - Reading data
 
-    public static func messages(toUsername: String, time: Int? = nil, before: Bool = true, count: Int = 200) -> [Message] {
+    public static func messages(toUsername: String, before: Bool = true, count: Int = 200) -> [Message] {
         var result = [Message]()
-        var startAtKey: String? = nil
-        if let time = time {
-            startAtKey = prefix + toUsername + "-\(time)"
-        }
-        forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, message: Message, stop) in
+        forumDB.enumerateKeysAndValues(backward: before, andPrefix: prefix + toUsername + "-") { (key, message: Message, stop) in
             if result.count < count {
                 result.append(message)
             } else {
