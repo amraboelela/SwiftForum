@@ -56,6 +56,10 @@ public struct User: Codable, Hashable {
         }
     }
     
+    public var moderatorOrAdmin: Bool {
+        return userRole == .moderator || userRole == .admin
+    }
+    
     public var userFullname: String {
         var result = fullname ?? ""
         if result.isVacant {
