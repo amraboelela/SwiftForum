@@ -320,10 +320,6 @@ public struct Post: Codable {
         var postKeys = [String]()
         var postKeySet = Set<String>()
         if searchText == "" {
-            //var startingAtKey: String? = nil
-            /*if let beforePostID = beforePostID {
-                startingAtKey = UserPost.prefix + username + "-" + beforePostID
-            }*/
             forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: UserPost.prefix + username + "-") { (key, userPost: UserPost, stop) in
                 if postKeys.count < count {
                     if !postKeySet.contains(userPost.postKey) {
@@ -359,6 +355,17 @@ public struct Post: Codable {
         return result
     }
 
+    public static func posts(forUsernameOrMention username: String, searchText: String = "", count: Int) -> [Post] {
+        var result = posts(forUsername: username, searchText: searchText, count: count)
+        let result2 = posts(withHashtagOrMention: "@" + username, searchText: searchText, count: count)
+        result.append(contentsOf: result2)
+        result = result.sorted { $0.time > $1.time }
+        if result.count > count {
+            result.removeLast(result.count - count)
+        }
+        return result
+    }
+    
     // MARK: - Saving data
     
     public func save() {
