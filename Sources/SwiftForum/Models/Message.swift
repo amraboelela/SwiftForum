@@ -55,7 +55,7 @@ public struct Message: Codable {
     
     // MARK: - Reading data
 
-    public static func messages(toUsername: String, time: Int? = nil, before: Bool = true, count: Int) -> [Message] {
+    public static func messages(toUsername: String, time: Int? = nil, before: Bool = true, count: Int = 200) -> [Message] {
         var result = [Message]()
         var startAtKey: String? = nil
         if let time = time {

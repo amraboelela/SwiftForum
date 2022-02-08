@@ -76,6 +76,14 @@ public struct User: Codable, Hashable {
         }
     }
     
+    public var messages: [Message]? {
+        let result = Message.messages(toUsername: username)
+        if result.count > 0 {
+            return result
+        }
+        return nil
+    }
+    
     // MARK: - Factory methods
     
     public static func createWith(username: String) -> User {
@@ -86,7 +94,7 @@ public struct User: Codable, Hashable {
         if let user: User = forumDB[prefix + username] {
             return user
         } else {
-            return nil //createWith(username: username)
+            return nil
         }
     }
 
