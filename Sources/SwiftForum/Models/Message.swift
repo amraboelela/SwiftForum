@@ -11,8 +11,8 @@ import SwiftLevelDB
 public struct Message: Codable {
     public static let prefix = "message-"
 
-    public var toUsername: String
     public var fromUsername: String
+    public var toUsername: String
     public var message: String
     public var timeSent: Int
     public var timeRead: Int?
@@ -27,14 +27,18 @@ public struct Message: Codable {
         return Date.friendlyDateStringFrom(epochTime: TimeInterval(timeSent))
     }
     
-    public var readDate: String {
-        return Date.friendlyDateStringFrom(epochTime: TimeInterval(timeRead))
+    public var readDate: String? {
+        if let timeRead = timeRead {
+            return Date.friendlyDateStringFrom(epochTime: TimeInterval(timeRead))
+        } else {
+            return nil
+        }
     }
     
     // MARK: - Factory methods
     
-    public static func createWith(toUsername: String, fromUsername: String, message: String) -> Message {
-        return Message(toUsername: toUsername, timeSent: Date.now, fromUsername: fromUsername, message: message)
+    public static func createWith(fromUsername: String, toUsername: String, message: String) -> Message {
+        return Message(fromUsername: fromUsername, toUsername: toUsername, message: message, timeSent: Date.now)
     }
 
     public static func messageWith(toUsername: String, time: Int, fromUsername: String) -> Message? {
