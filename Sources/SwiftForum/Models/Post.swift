@@ -148,12 +148,10 @@ public struct Post: Codable {
                 var parentsKeys = [String]()
                 forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
                     if parentsKeys.count < count {
-                        //if !(post.isDeleted == true) && !(post.parent?.isDeleted == true) {
                         let parentKey = post.parent ?? post.key
                         if !parentsKeys.contains(parentKey) {
                             parentsKeys.append(parentKey)
                         }
-                        //}
                     } else {
                         stop.pointee = true
                     }
@@ -163,12 +161,19 @@ public struct Post: Codable {
                         result.append(post)
                     }
                 }
+                result = result.sorted { post1, post2 in
+                    if post1.pinned == true && post2.pinned != true {
+                        return true
+                    }
+                    if post1.pinned != true && post2.pinned == true {
+                        return false
+                    }
+                    return post1.time > post1.time
+                }
             } else {
                 forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
                     if result.count < count {
-                        //if !(post.isDeleted == true) {
                         result.append(post)
-                        //}
                     } else {
                         stop.pointee = true
                     }
@@ -187,9 +192,7 @@ public struct Post: Codable {
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
             forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: Word.prefix + firstWord) { (key, word: Word, stop) in
-                //if Word.time(fromKey: key) >= time {
                 wordPostKeys.append(word.postKey)
-                //}
             }
             for wordPostKey in wordPostKeys {
                 var foundTheSearch = true
@@ -202,9 +205,7 @@ public struct Post: Codable {
                         }
                     }
                     if foundTheSearch {
-                        //if !(post.isDeleted == true) {
                         result.append(post)
-                        //}
                     }
                 }
             }
