@@ -12,13 +12,13 @@ public struct UserPost: Codable {
     
     public var postKey: String
 
-    static func postID(fromKey key: String) -> String {
+    /*static func postID(fromKey key: String) -> String {
         var result = ""
         let arr = key.components(separatedBy: "-")
         if arr.count > 2 {
             result = arr[2]
         }
         return result
-    }
+    }*/
 
 }

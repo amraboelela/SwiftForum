@@ -19,6 +19,8 @@ public struct Post: Codable {
     public var children: [String]? // children post keys
     public var replyTo: String? // reply to post key
     public var closed: Bool?
+    public var isPrivate: Bool?
+    public var pinned: Bool?
     public var reportedBy: [String]? // usernames
     
     // MARK: - Accessors
