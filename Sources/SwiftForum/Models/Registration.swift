@@ -19,7 +19,7 @@ public struct Registration: Codable {
         return true
     }
 
-    public static func changeRegistion(toOpen: Bool) {
+    public static func changeRegistration(toOpen: Bool) {
         forumDB[Registration.prefix] = Registration(isOpen: toOpen)
     }
 }
