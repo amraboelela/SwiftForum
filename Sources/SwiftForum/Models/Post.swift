@@ -399,6 +399,13 @@ public struct Post: Codable {
         }
     }
     
+    public func delete() {
+        for childKey in children {
+            forumDB[childKey] = nil
+        }
+        forumDB[key] = nil
+    }
+    
     // MARK: - Public functions
     
     public static func key(ofPost post: Post) -> String {
