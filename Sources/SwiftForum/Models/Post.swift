@@ -382,12 +382,12 @@ public struct Post: Codable {
     
     public func save() {
         let postKey = Post.prefix + "\(time)-" + username
-        let userPostKey = UserPost.prefix + username + "-\(time)"
-        forumDB[userPostKey] = UserPost(postKey: postKey)
         forumDB[postKey] = self
         if isPrivate == true || parentPost?.isPrivate == true {
             return // do not index private "admin" posts
         }
+        let userPostKey = UserPost.prefix + username + "-\(time)"
+        forumDB[userPostKey] = UserPost(postKey: postKey)
         for hashtag in message.hashtags {
             forumDB[hashtag + "-\(time)-" + username] = HashtagOrMention(postKey: postKey)
         }
