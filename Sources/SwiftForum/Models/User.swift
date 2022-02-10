@@ -80,6 +80,14 @@ public struct User: Codable, Hashable {
         }
     }
     
+    public var nonReadMessages: [Message]? {
+        let result = Message.messages(toUsername: username, nonReadOnly: true)
+        if result.count > 0 {
+            return result
+        }
+        return nil
+    }
+    
     public var messages: [Message]? {
         let result = Message.messages(toUsername: username)
         if result.count > 0 {
