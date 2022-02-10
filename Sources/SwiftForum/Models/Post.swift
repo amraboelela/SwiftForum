@@ -97,7 +97,14 @@ public struct Post: Codable {
     
     // MARK: - Reading data
 
-    public static func posts(withSearchText searchText: String, time: Int? = nil, before: Bool = true, parentsOnly: Bool = false, count: Int) -> [Post] {
+    public static func posts(
+        withSearchText searchText: String,
+        time: Int? = nil,
+        before: Bool = true,
+        parentsOnly: Bool = false,
+        includePrivate: Bool = false,
+        count: Int
+    ) -> [Post] {
         var result = [Post]()
         let searchWords = Word.words(fromText: searchText)
         if let firstWord = searchWords.first {
@@ -128,9 +135,7 @@ public struct Post: Codable {
                         }
                     }
                     if foundTheSearch {
-                        //if !(post.isDeleted == true) {
                         result.append(post)
-                        //}
                     }
                 }
             }
@@ -148,9 +153,11 @@ public struct Post: Codable {
                 var parentsKeys = [String]()
                 forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
                     if parentsKeys.count < count {
-                        let parentKey = post.parent ?? post.key
-                        if !parentsKeys.contains(parentKey) {
-                            parentsKeys.append(parentKey)
+                        if includePrivate || (!includePrivate && post.isPrivate != true) {
+                            let parentKey = post.parent ?? post.key
+                            if !parentsKeys.contains(parentKey) {
+                                parentsKeys.append(parentKey)
+                            }
                         }
                     } else {
                         stop.pointee = true
@@ -158,7 +165,9 @@ public struct Post: Codable {
                 }
                 for parentKey in parentsKeys {
                     if let post: Post = forumDB[parentKey] {
-                        result.append(post)
+                        if includePrivate || (!includePrivate && post.isPrivate != true) {
+                            result.append(post)
+                        }
                     }
                 }
                 result = result.sorted { post1, post2 in
@@ -376,6 +385,9 @@ public struct Post: Codable {
         let userPostKey = UserPost.prefix + username + "-\(time)"
         forumDB[userPostKey] = UserPost(postKey: postKey)
         forumDB[postKey] = self
+        if isPrivate == true || parentPost?.isPrivate == true {
+            return // do not index private "admin" posts
+        }
         for hashtag in message.hashtags {
             forumDB[hashtag + "-\(time)-" + username] = HashtagOrMention(postKey: postKey)
         }
