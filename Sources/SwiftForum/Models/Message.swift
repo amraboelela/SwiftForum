@@ -59,7 +59,7 @@ public struct Message: Codable {
         var result = [Message]()
         forumDB.enumerateKeysAndValues(backward: true, andPrefix: prefix + toUsername + "-") { (key, message: Message, stop) in
             if result.count < count {
-                if !nonReadOnly || message.timeRead != nil {
+                if !nonReadOnly || message.timeRead == nil {
                     result.append(message)
                 }
             } else {
