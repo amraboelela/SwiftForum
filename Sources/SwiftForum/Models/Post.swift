@@ -400,10 +400,14 @@ public struct Post: Codable {
     }
     
     public func delete() {
-        for childKey in children {
-            forumDB[childKey] = nil
+        guard let children = children else {
+            print("Couldn't get children")
+            return
         }
-        forumDB[key] = nil
+        for childKey in children {
+            forumDB.removeValueForKey(childKey)
+        }
+        forumDB.removeValueForKey(key)
     }
     
     // MARK: - Public functions
