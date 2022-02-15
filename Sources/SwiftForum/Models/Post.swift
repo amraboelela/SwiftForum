@@ -404,6 +404,9 @@ public struct Post: Codable {
             for childKey in children {
                 forumDB.removeValueForKey(childKey)
             }
+        } else if var parentPost = parentPost {
+            parentPost.children = parentPost.children?.filter { $0 != key }
+            parentPost.save()
         }
         forumDB.removeValueForKey(key)
     }
