@@ -400,14 +400,18 @@ public struct Post: Codable {
     }
     
     public func delete() {
+        print("delete: \(key)")
         if let children = children {
+            print("delete: let children = children")
             for childKey in children {
                 forumDB.removeValueForKey(childKey)
             }
         } else if var parentPost = parentPost {
+            print("delete: parentPost: \(parentPost)")
             parentPost.children = parentPost.children?.filter { $0 != key }
             parentPost.save()
         }
+        print("delete: removeValueForKey: \(key)")
         forumDB.removeValueForKey(key)
     }
     
