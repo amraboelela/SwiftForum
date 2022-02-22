@@ -10,11 +10,11 @@ import Foundation
 import SwiftLevelDB
 import Dispatch
 
-public var forumDB = ForumDB(name: "ForumDB")
+public var forumDB: ForumDB!
 
 open class ForumDB: LevelDB {
     public var dbPath = ""
-    
+
     // MARK: - Life cycle
     
     required public init(path: String, name: String) {
