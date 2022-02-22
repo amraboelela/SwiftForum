@@ -10,10 +10,11 @@ import Foundation
 import SwiftLevelDB
 import Dispatch
 
-public var forumDB = ForumDB(name: "ForumDB")
+public var forumDB: ForumDB!//(name: "ForumDB")
 
 open class ForumDB: LevelDB {
     public var dbPath = ""
+/*
 #if os(macOS)
     public var libraryPath: String {
         get {
@@ -25,7 +26,8 @@ open class ForumDB: LevelDB {
 #else
     public var libraryPath = ""
 #endif
-    
+  */
+  
     var dbBackupPath = ""
     var lastBackupTime = TimeInterval(0)
 #if DEBUG && os(Linux)
@@ -35,7 +37,7 @@ open class ForumDB: LevelDB {
 #endif
     
     // MARK: - Life cycle
-    
+/*    
     public init(name: String) {
 #if DEBUG
         //logger.log("ForumDB DEBUG")
@@ -76,7 +78,8 @@ open class ForumDB: LevelDB {
         //lastBackupTime = Date.timeIntervalSinceReferenceDate
         //logger.log("after ForumDB.lastBackupTime")
     }
-    
+  */
+  
     required public init(path: String, name: String) {
         dbPath = path
         let weekday = 1
