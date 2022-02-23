@@ -26,9 +26,9 @@ final class DatabaseTests: XCTestCase {
         XCTAssertNotNil(forumDB.dbPath)
     }
     
-    func testLibraryPath() {
+    func testParentPath() {
         let forumDB = ForumDB(name: "ForumDB")
-        forumDB.dbPath = "/path/to/Library/Database"
-        //XCTAssertEqual(forumDB.libraryPath, "/path/to/Library")
+        forumDB.parentPath = "/path/to/Library"
+        XCTAssertEqual(forumDB.dbPath, "/path/to/Library/ForumDB")
     }
 }
