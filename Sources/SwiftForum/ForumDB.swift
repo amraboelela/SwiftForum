@@ -10,8 +10,6 @@ import Foundation
 import SwiftLevelDB
 import Dispatch
 
-public var forumDB: ForumDB!
-
 open class ForumDB: LevelDB {
 
 }
