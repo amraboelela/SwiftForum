@@ -378,7 +378,7 @@ public struct Post: Codable {
         return result
     }
     
-    // MARK: - Saving data
+    // MARK: - Updating data
     
     public func save() {
         let postKey = Post.prefix + "\(time)-" + username
