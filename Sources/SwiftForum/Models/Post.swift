@@ -277,19 +277,22 @@ public struct Post: Codable {
     public static func posts(withHashtagOrMention hashtagOrMention: String, searchText: String? = nil, beforePostTime: Int? = nil, count: Int) -> [Post] {
         var result = [Post]()
         
-        var mentionPostKeys = [String]()
+        var postKeys = [String]()
         if let searchText = searchText, !searchText.isEmpty {
             if let beforePostTime = beforePostTime {
                 forumDB.enumerateKeysAndValues(backward: true, startingAtKey: hashtagOrMention.lowercased() + "-\(beforePostTime)", andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
-                    mentionPostKeys.append(hashtagOrMention.postKey)
+                    if !postKeys.contains(hashtagOrMention.postKey) {
+                        postKeys.append(hashtagOrMention.postKey)
+                    }
                 }
             } else {
                 forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
-                    mentionPostKeys.append(hashtagOrMention.postKey)
+                    postKeys.append(hashtagOrMention.postKey)
                 }
             }
-            for mentionPostKey in mentionPostKeys {
-                if let post: Post = forumDB[mentionPostKey] {
+            postKeys = postKeys.sorted { $0 > $1 }
+            for postKey in postKeys {
+                if let post: Post = forumDB[postKey] {
                     let theTextSearch = searchText.lowercased()
                     if post.message.lowercased().range(of: theTextSearch) != nil {
                         if result.count < count {
@@ -303,23 +306,28 @@ public struct Post: Codable {
         } else {
             if let beforePostTime = beforePostTime {
                 forumDB.enumerateKeysAndValues(backward: true, startingAtKey: hashtagOrMention.lowercased() + "-\(beforePostTime)", andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
-                    if mentionPostKeys.count < count {
-                        mentionPostKeys.append(hashtagOrMention.postKey)
+                    if postKeys.count < count {
+                        if !postKeys.contains(hashtagOrMention.postKey) {
+                            postKeys.append(hashtagOrMention.postKey)
+                        }
                     } else {
                         stop.pointee = true
                     }
                 }
             } else {
                 forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
-                    if mentionPostKeys.count < count {
-                        mentionPostKeys.append(hashtagOrMention.postKey)
+                    if postKeys.count < count {
+                        if !postKeys.contains(hashtagOrMention.postKey) {
+                            postKeys.append(hashtagOrMention.postKey)
+                        }
                     } else {
                         stop.pointee = true
                     }
                 }
             }
-            for mentionPostKey in mentionPostKeys {
-                if let post: Post = forumDB[mentionPostKey] {
+            postKeys = postKeys.sorted { $0 > $1 }
+            for postKey in postKeys {
+                if let post: Post = forumDB[postKey] {
                     result.append(post)
                 }
             }
