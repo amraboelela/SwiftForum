@@ -84,17 +84,6 @@ public struct Post: Codable {
         return nil
     }
     
-    // MARK: - Updating data
-    
-    public mutating func addChild(postKey: String) {
-        if children == nil {
-            children = [String]()
-        }
-        if children?.contains(postKey) == false {
-            children?.append(postKey)
-        }
-    }
-    
     // MARK: - Reading data
 
     public static func posts(
@@ -386,7 +375,36 @@ public struct Post: Codable {
         return result
     }
     
+    public func lastPagePost(pageSize: Int) -> Post {
+        var childrenKeys = [String]()
+        if let children = self.children {
+            childrenKeys = children
+        } else if let theParentPost = self.parentPost, let theChildrenKeys = theParentPost.children {
+            childrenKeys = theChildrenKeys
+        }
+        if childrenKeys.count > pageSize {
+            var lastPageSize = childrenKeys.count % pageSize
+            if lastPageSize == 0 {
+                lastPageSize = pageSize
+            }
+            let lastPagePostKey = childrenKeys[childrenKeys.count - lastPageSize]
+            if let lastPagePost = Post.postWith(key: lastPagePostKey) {
+                return lastPagePost
+            }
+        }
+        return self
+    }
+    
     // MARK: - Updating data
+    
+    public mutating func addChild(postKey: String) {
+        if children == nil {
+            children = [String]()
+        }
+        if children?.contains(postKey) == false {
+            children?.append(postKey)
+        }
+    }
     
     public func save() {
         let postKey = Post.prefix + "\(time)-" + username
