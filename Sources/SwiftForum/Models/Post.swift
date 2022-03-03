@@ -375,12 +375,21 @@ public struct Post: Codable {
         return result
     }
     
-    public func lastPagePost(pageSize: Int) -> Post {
+    public func pagePost(pageSize: Int) -> Post {
         var childrenKeys = [String]()
         if let children = self.children {
             childrenKeys = children
         } else if let theParentPost = self.parentPost, let theChildrenKeys = theParentPost.children {
             childrenKeys = theChildrenKeys
+            var postIndex = 0
+            if let theIndex = childrenKeys.firstIndex(of: self.key), theIndex > 0 {
+                postIndex = theIndex - 1
+            }
+            let pageNumber = postIndex / pageSize
+            let postKey = childrenKeys[pageNumber * pageSize]
+            if let post = Post.postWith(key: postKey) {
+                return post
+            }
         }
         if childrenKeys.count > pageSize {
             var lastPageSize = childrenKeys.count % pageSize
