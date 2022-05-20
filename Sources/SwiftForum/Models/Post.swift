@@ -183,9 +183,9 @@ public struct Post: Codable {
     }
 
     // if this post is a child then show parent and siblings starting from current child
-    public func childPosts(withSearchText searchText: String? = nil, count: Int, before: Bool = false, activeUsersOnly: Bool) -> [Post] {
+    public func childPosts(withSearchText searchText: String? = nil, count: Int, before: Bool = false, activeUsersOnly: Bool, loggedinUsername: String) -> [Post] {
         var result = [Post]()
-        let theChildPosts = childPosts(count: count, before: before, activeUsersOnly: activeUsersOnly)
+        let theChildPosts = childPosts(count: count, before: before, activeUsersOnly: activeUsersOnly, loggedinUsername: loggedinUsername)
         let searchWords = Word.words(fromText: searchText ?? "")
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
@@ -220,7 +220,7 @@ public struct Post: Codable {
     }
     
     // if this post is a child then show parent and siblings starting from current child
-    private func childPosts(count: Int, before: Bool = false, activeUsersOnly: Bool) -> [Post] {
+    private func childPosts(count: Int, before: Bool = false, activeUsersOnly: Bool, loggedinUsername: String) -> [Post] {
         var result = [Post]()
         if let parentPost = parentPost {
             if let childrenKeys = parentPost.children, let childIndex = childrenKeys.firstIndex(of: self.key) {
@@ -231,7 +231,7 @@ public struct Post: Codable {
                             if let childPost = Post.postWith(key: childrenKeys[i]) {
                                 if !activeUsersOnly {
                                     result.append(childPost)
-                                } else if childPost.username == parentPost.username {
+                                } else if childPost.username == loggedinUsername {
                                     result.append(childPost)
                                 } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
                                     result.append(childPost)
@@ -247,7 +247,7 @@ public struct Post: Codable {
                             if let childPost = Post.postWith(key: childrenKeys[i]) {
                                 if !activeUsersOnly {
                                     result.append(childPost)
-                                } else if childPost.username == parentPost.username {
+                                } else if childPost.username == loggedinUsername {
                                     result.append(childPost)
                                 } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
                                     result.append(childPost)
