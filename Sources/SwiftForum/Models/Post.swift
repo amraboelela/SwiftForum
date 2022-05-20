@@ -183,9 +183,9 @@ public struct Post: Codable {
     }
 
     // if this post is a child then show parent and siblings starting from current child
-    public func childPosts(withSearchText searchText: String? = nil, count: Int, before: Bool = false) -> [Post] {
+    public func childPosts(withSearchText searchText: String? = nil, count: Int, before: Bool = false, activeUsersOnly: Bool) -> [Post] {
         var result = [Post]()
-        let theChildPosts = childPosts(count: count, before: before)
+        let theChildPosts = childPosts(count: count, before: before, activeUsersOnly: activeUsersOnly)
         let searchWords = Word.words(fromText: searchText ?? "")
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
@@ -220,7 +220,7 @@ public struct Post: Codable {
     }
     
     // if this post is a child then show parent and siblings starting from current child
-    private func childPosts(count: Int, before: Bool = false) -> [Post] {
+    private func childPosts(count: Int, before: Bool = false, activeUsersOnly: Bool) -> [Post] {
         var result = [Post]()
         if let parentPost = parentPost {
             if let childrenKeys = parentPost.children, let childIndex = childrenKeys.firstIndex(of: self.key) {
@@ -229,7 +229,11 @@ public struct Post: Codable {
                     for i in firstIndex..<childrenKeys.count {
                         if result.count < count {
                             if let childPost = Post.postWith(key: childrenKeys[i]) {
-                                result.append(childPost)
+                                if !activeUsersOnly {
+                                    result.append(childPost)
+                                } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
+                                    result.append(childPost)
+                                }
                             }
                         } else {
                             break
@@ -239,7 +243,11 @@ public struct Post: Codable {
                     for i in childIndex..<childrenKeys.count {
                         if result.count < count {
                             if let childPost = Post.postWith(key: childrenKeys[i]) {
-                                result.append(childPost)
+                                if !activeUsersOnly {
+                                    result.append(childPost)
+                                } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
+                                    result.append(childPost)
+                                }
                             }
                         } else {
                             break
@@ -252,7 +260,11 @@ public struct Post: Codable {
                 for childKey in childrenKeys {
                     if result.count < count {
                         if let childPost = Post.postWith(key: childKey) {
-                            result.append(childPost)
+                            if !activeUsersOnly {
+                                result.append(childPost)
+                            } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
+                                result.append(childPost)
+                            }
                         }
                     } else {
                         break
