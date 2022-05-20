@@ -9,6 +9,7 @@ import Foundation
 import SwiftLevelDB
 
 public enum UserRole: String {
+    case pending
     case member
     case moderator
     case admin
@@ -37,7 +38,7 @@ public struct User: Codable, Hashable {
             if let role = role, let result = UserRole(rawValue:role) {
                 return result
             }
-            return .member
+            return .pending
         }
         set {
             self.role = newValue.rawValue
@@ -47,6 +48,8 @@ public struct User: Codable, Hashable {
     public var arabicUserRole: String {
         let userRole = self.userRole
         switch userRole {
+        case .pending:
+            return "pending"
         case .member:
             return "عضو"
         case .moderator:
