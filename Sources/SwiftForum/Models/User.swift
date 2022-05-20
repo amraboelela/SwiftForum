@@ -9,10 +9,15 @@ import Foundation
 import SwiftLevelDB
 
 public enum UserRole: String {
-    case pending
     case member
     case moderator
     case admin
+}
+
+public enum UserStatus: String {
+    case pending // pending membership when a user first register.
+    case active
+    case suspended
 }
 
 public struct User: Codable, Hashable {
@@ -22,6 +27,7 @@ public struct User: Codable, Hashable {
     public var username: String
     public var password: String
     public var role: String?
+    public var status: String?
     public var timeJoined: Int
     public var timeLoggedin: Int?
     public var fullname: String?
@@ -29,7 +35,6 @@ public struct User: Codable, Hashable {
     public var location: String?
     public var url: String?
     public var avatar: String?
-    public var suspended: Bool?
 
     // MARK: - Accessors
 
@@ -38,18 +43,28 @@ public struct User: Codable, Hashable {
             if let role = role, let result = UserRole(rawValue:role) {
                 return result
             }
-            return .pending
+            return .member
         }
         set {
             self.role = newValue.rawValue
         }
     }
     
+    public var userStatus: UserStatus {
+        get {
+            if let status = status, let result = UserStatus(rawValue:status) {
+                return result
+            }
+            return .active
+        }
+        set {
+            self.status = newValue.rawValue
+        }
+    }
+    
     public var arabicUserRole: String {
         let userRole = self.userRole
         switch userRole {
-        case .pending:
-            return "pending"
         case .member:
             return "عضو"
         case .moderator:
@@ -59,8 +74,24 @@ public struct User: Codable, Hashable {
         }
     }
     
+    public var arabicUserStatus: String {
+        let userStatus = self.userStatus
+        switch userStatus {
+        case .pending:
+            return "عضوية معلقة"
+        case .active:
+            return "عضوية نشطة"
+        case .suspended:
+            return "موقوف"
+        }
+    }
+    
     public var moderatorOrAdmin: Bool {
         return userRole == .moderator || userRole == .admin
+    }
+    
+    public var active: Bool {
+        return userStatus == .active
     }
     
     public var userFullname: String {
