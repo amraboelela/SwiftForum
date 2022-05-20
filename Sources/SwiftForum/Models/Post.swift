@@ -231,6 +231,8 @@ public struct Post: Codable {
                             if let childPost = Post.postWith(key: childrenKeys[i]) {
                                 if !activeUsersOnly {
                                     result.append(childPost)
+                                } else if childPost.username == parentPost.username {
+                                    result.append(childPost)
                                 } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
                                     result.append(childPost)
                                 }
@@ -244,6 +246,8 @@ public struct Post: Codable {
                         if result.count < count {
                             if let childPost = Post.postWith(key: childrenKeys[i]) {
                                 if !activeUsersOnly {
+                                    result.append(childPost)
+                                } else if childPost.username == parentPost.username {
                                     result.append(childPost)
                                 } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
                                     result.append(childPost)
@@ -261,6 +265,8 @@ public struct Post: Codable {
                     if result.count < count {
                         if let childPost = Post.postWith(key: childKey) {
                             if !activeUsersOnly {
+                                result.append(childPost)
+                            } else if childPost.username == parentPost.username {
                                 result.append(childPost)
                             } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
                                 result.append(childPost)
