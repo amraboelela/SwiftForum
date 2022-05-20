@@ -173,7 +173,7 @@ public struct User: Codable, Hashable {
     public static func users(withUsernamePrefix usernamePrefix: String) -> [User] {
         var result = [User]()
         forumDB.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix + usernamePrefix) { (key, user: User, stop) in
-            if !(user.suspended == true) {
+            if user.userStatus != .suspended {
                 result.append(user)
             }
         }
