@@ -78,9 +78,9 @@ public struct User: Codable, Hashable {
         let userStatus = self.userStatus
         switch userStatus {
         case .pending:
-            return "عضوية معلقة"
+            return "معلَّق"
         case .active:
-            return "عضوية نشطة"
+            return ""
         case .suspended:
             return "موقوف"
         }
