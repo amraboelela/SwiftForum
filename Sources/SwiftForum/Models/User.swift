@@ -8,13 +8,13 @@
 import Foundation
 import SwiftLevelDB
 
-public enum UserRole: String, Codable {
+public enum UserRole: String {
     case member
     case moderator
     case admin
 }
 
-public enum UserStatus: String, Codable {
+public enum UserStatus: String {
     case pending // pending membership when a user first register.
     case active
     case suspended
