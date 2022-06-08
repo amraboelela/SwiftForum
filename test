@@ -5,5 +5,5 @@ PARAM=x$1
 if [ $PARAM = "xrelease" ]; then
     swift test
 else
-    swift test -Xswiftc -DDEBUG -Xswiftc -DTwisterServer 2<&1 | tee || exit
+    swift test -Xswiftc -DDEBUG 2<&1 | tee || exit
 fi
