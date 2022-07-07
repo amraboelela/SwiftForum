@@ -38,7 +38,7 @@ public struct Message: Codable {
     // MARK: - Factory methods
     
     public static func createWith(fromUsername: String, toUsername: String, message: String) -> Message {
-        return Message(fromUsername: fromUsername, toUsername: toUsername, message: message, timeSent: Date.now)
+        return Message(fromUsername: fromUsername, toUsername: toUsername, message: message, timeSent: Date.secondsSince1970)
     }
 
     public static func messageWith(toUsername: String, time: Int, fromUsername: String) -> Message? {
@@ -117,7 +117,7 @@ public struct Message: Codable {
     public static func deleteReadMessages() {
         var keysToBeDeleted = [String]()
         forumDB.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix) { (key, message: Message, stop) in
-            if let timeRead = message.timeRead, Date.now - timeRead > Int(Date.oneDay) {
+            if let timeRead = message.timeRead, Date.secondsSince1970 - timeRead > Int(Date.oneDay) {
                 keysToBeDeleted.append(key)
             }
         }

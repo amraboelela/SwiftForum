@@ -133,7 +133,7 @@ public struct User: Codable, Hashable {
     // MARK: - Factory methods
     
     public static func createWith(username: String) -> User {
-        return User(username: username, password: "", timeJoined: Date.now)
+        return User(username: username, password: "", timeJoined: Date.secondsSince1970)
     }
 
     public static func userWith(username: String) -> User? {

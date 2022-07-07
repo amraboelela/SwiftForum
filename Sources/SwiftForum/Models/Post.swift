@@ -69,7 +69,7 @@ public struct Post: Codable {
     // MARK: - Factory methods
     
     public static func createWith(username: String, message: String) -> Post {
-        return Post(time: Date.now, username: username, message: message)
+        return Post(time: Date.secondsSince1970, username: username, message: message)
     }
 
     public static func postWith(time: Int, username: String) -> Post? {
