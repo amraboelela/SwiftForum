@@ -8,7 +8,7 @@
 
 import Foundation
 import SwiftLevelDB
-import Dispatch
+//import Dispatch
 
 public var forumDB: ForumDB!
 
