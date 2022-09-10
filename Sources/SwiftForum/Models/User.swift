@@ -114,16 +114,16 @@ public struct User: Codable, Hashable {
         }
     }
     
-    public var nonReadMessages: [Message]? {
-        let result = Message.messages(toUsername: username, nonReadOnly: true)
+    public func nonReadMessages() async -> [Message]? {
+        let result = await Message.messages(toUsername: username, nonReadOnly: true)
         if result.count > 0 {
             return result
         }
         return nil
     }
     
-    public var messages: [Message]? {
-        let result = Message.messages(toUsername: username)
+    public func messages() async -> [Message]? {
+        let result = await Message.messages(toUsername: username)
         if result.count > 0 {
             return result
         }
@@ -136,8 +136,8 @@ public struct User: Codable, Hashable {
         return User(username: username, password: "", timeJoined: Date.secondsSince1970)
     }
 
-    public static func userWith(username: String) -> User? {
-        if let user: User = forumDB[prefix + username] {
+    public static func userWith(username: String) async -> User? {
+        if let user: User = await database.value(forKey: prefix + username) {
             return user
         } else {
             return nil
@@ -162,17 +162,17 @@ public struct User: Codable, Hashable {
     
     // MARK: - Public functions
 
-    public static func usernameExists(_ username: String) -> Bool {
-        if let _: User = forumDB[User.prefix + username] {
+    public static func usernameExists(_ username: String) async -> Bool {
+        if let _: User = await database.value(forKey: User.prefix + username) {
             return true
         } else {
             return false
         }
     }
     
-    public static func users(withUsernamePrefix usernamePrefix: String) -> [User] {
+    public static func users(withUsernamePrefix usernamePrefix: String) async -> [User] {
         var result = [User]()
-        forumDB.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix + usernamePrefix) { (key, user: User, stop) in
+        await database.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix + usernamePrefix) { (key, user: User, stop) in
             if user.userStatus != .suspended {
                 result.append(user)
             }

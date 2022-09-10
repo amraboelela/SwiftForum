@@ -1,34 +1,40 @@
 //
 //  DatabaseTests.swift
-//  SwiftForumTests
+//  DarkEyeCoreTests
 //
-//  Created by: Amr Aboelela on 1/24/22.
+//  Created by: Amr Aboelela on 9/10/22.
 //
 
 import Foundation
-import CoreFoundation
 import XCTest
+import SwiftLevelDB
 @testable import SwiftForum
 
-final class DatabaseTests: XCTestCase {
+final class DatabaseTests: TestsBase {
     
-    override func setUp() {
-        super.setUp()
+    override func asyncSetup() async {
+        await super.asyncSetup()
+        let testRoot = URL(fileURLWithPath: #file.replacingOccurrences(of: "SwiftForumTests/DatabaseTests.swift", with: "/")).path
+        database = LevelDB(parentPath: testRoot + "Library", name: "Database")
     }
     
-    override func tearDown() {
-        super.tearDown()
+    override func asyncTearDown() async {
+        await super.asyncTearDown()
     }
     
-    func testInit() {
-        let forumDB = ForumDB(name: "ForumDB")
-        XCTAssertNotNil(forumDB)
-        XCTAssertNotNil(forumDB.dbPath)
+    func testInit() async {
+        await asyncSetup()
+        XCTAssertNotNil(database)
+        let parentPath = await database.parentPath
+        XCTAssertNotNil(parentPath)
+        await asyncTearDown()
     }
     
-    func testParentPath() {
-        let forumDB = ForumDB(name: "ForumDB")
-        forumDB.parentPath = "/path/to/Library"
-        XCTAssertEqual(forumDB.dbPath, "/path/to/Library/ForumDB")
+    func testParentPath() async {
+        await asyncSetup()
+        await database.setParentPath("/path/to/Library")
+        let dbPath = await database.dbPath
+        XCTAssertEqual(dbPath, "/path/to/Library/Database")
+        await asyncTearDown()
     }
 }

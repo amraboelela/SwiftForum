@@ -25,38 +25,38 @@ public struct Post: Codable {
     
     // MARK: - Accessors
     
-    public static var lastKey: String {
+    public static func lastKey() async -> String {
         var result = ""
-        forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: prefix) { (key, post: Post, stop) in
+        await database.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: prefix) { (key, post: Post, stop) in
             result = key
             stop.pointee = true
         }
         return result
     }
 
-    static var firstKey: String? {
+    static func firstKey() async -> String? {
         var result : String?
-        forumDB.enumerateKeys(backward: false, startingAtKey: nil, andPrefix: prefix) { key, stop in
+        await database.enumerateKeys(backward: false, startingAtKey: nil, andPrefix: prefix) { key, stop in
             result = key
             stop.pointee = true
         }
         return result
     }
     
-    public static var firstPostTime: Int? {
-        return time(fromPostKey: firstKey)
+    public static func firstPostTime() async -> Int? {
+        return await time(fromPostKey: firstKey())
     }
     
-    public static var lastPostTime: Int? {
-        return time(fromPostKey: lastKey)
+    public static func lastPostTime() async -> Int? {
+        return await time(fromPostKey: lastKey())
     }
 
     public var key: String {
         return Post.prefix + "\(time)-" + username
     }
 
-    public var parentPost: Post? {
-        if let parentKey = parent, let post: Post = forumDB[parentKey] {
+    public func parentPost() async -> Post? {
+        if let parentKey = parent, let post: Post = await database.value(forKey: parentKey) {
             return post
         }
         return nil
@@ -72,13 +72,13 @@ public struct Post: Codable {
         return Post(time: Date.secondsSince1970, username: username, message: message)
     }
 
-    public static func postWith(time: Int, username: String) -> Post? {
+    public static func postWith(time: Int, username: String) async -> Post? {
         let postKey = prefix + "\(time)" + "-" + username
-        return postWith(key: postKey)
+        return await postWith(key: postKey)
     }
     
-    public static func postWith(key: String) -> Post? {
-        if let post: Post = forumDB[key] {
+    public static func postWith(key: String) async -> Post? {
+        if let post: Post = await database.value(forKey: key) {
             return post
         }
         return nil
@@ -93,12 +93,12 @@ public struct Post: Codable {
         parentsOnly: Bool = false,
         includePrivate: Bool = false,
         count: Int
-    ) -> [Post] {
+    ) async -> [Post] {
         var result = [Post]()
         let searchWords = Word.words(fromText: searchText)
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
-            forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: Word.prefix + firstWord) { (key, word: Word, stop) in
+            await database.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: Word.prefix + firstWord) { (key, word: Word, stop) in
                 if time == nil {
                     wordPostKeys.append(word.postKey)
                 } else if let time = time {
@@ -115,7 +115,7 @@ public struct Post: Codable {
             }
             for wordPostKey in wordPostKeys {
                 var foundTheSearch = true
-                if let post: Post = forumDB[wordPostKey] {
+                if let post: Post = await database.value(forKey: wordPostKey) {
                     for i in 1..<searchWords.count {
                         let searchWord = searchWords[i]
                         if post.message.lowercased().range(of: searchWord) == nil {
@@ -140,7 +140,7 @@ public struct Post: Codable {
             }
             if parentsOnly {
                 var parentsKeys = [String]()
-                forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
+                await database.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
                     if parentsKeys.count < count {
                         if includePrivate || (!includePrivate && post.isPrivate != true) {
                             let parentKey = post.parent ?? post.key
@@ -153,7 +153,7 @@ public struct Post: Codable {
                     }
                 }
                 for parentKey in parentsKeys {
-                    if let post: Post = forumDB[parentKey] {
+                    if let post: Post = await database.value(forKey: parentKey) {
                         if includePrivate || (!includePrivate && post.isPrivate != true) {
                             result.append(post)
                         }
@@ -169,7 +169,7 @@ public struct Post: Codable {
                     return post1.time > post1.time
                 }
             } else {
-                forumDB.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
+                await database.enumerateKeysAndValues(backward: before, startingAtKey: startAtKey, andPrefix: prefix) { (key, post: Post, stop) in
                     if result.count < count {
                         result.append(post)
                     } else {
@@ -183,18 +183,18 @@ public struct Post: Codable {
     }
 
     // if this post is a child then show parent and siblings starting from current child
-    public func childPosts(withSearchText searchText: String? = nil, count: Int, before: Bool = false, activeUsersOnly: Bool, loggedinUsername: String) -> [Post] {
+    public func childPosts(withSearchText searchText: String? = nil, count: Int, before: Bool = false, activeUsersOnly: Bool, loggedinUsername: String) async -> [Post] {
         var result = [Post]()
-        let theChildPosts = childPosts(count: count, before: before, activeUsersOnly: activeUsersOnly, loggedinUsername: loggedinUsername)
+            let theChildPosts = await childPosts(count: count, before: before, activeUsersOnly: activeUsersOnly, loggedinUsername: loggedinUsername)
         let searchWords = Word.words(fromText: searchText ?? "")
         if let firstWord = searchWords.first {
             var wordPostKeys = [String]()
-            forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: Word.prefix + firstWord) { (key, word: Word, stop) in
+            await database.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: Word.prefix + firstWord) { (key, word: Word, stop) in
                 wordPostKeys.append(word.postKey)
             }
             for wordPostKey in wordPostKeys {
                 var foundTheSearch = true
-                if let post: Post = forumDB[wordPostKey] {
+                if let post: Post = await database.value(forKey: wordPostKey) {
                     for i in 1..<searchWords.count {
                         let searchWord = searchWords[i]
                         if post.message.lowercased().range(of: searchWord) == nil {
@@ -220,20 +220,20 @@ public struct Post: Codable {
     }
     
     // if this post is a child then show parent and siblings starting from current child
-    private func childPosts(count: Int, before: Bool = false, activeUsersOnly: Bool, loggedinUsername: String) -> [Post] {
+    private func childPosts(count: Int, before: Bool = false, activeUsersOnly: Bool, loggedinUsername: String) async -> [Post] {
         var result = [Post]()
-        if let parentPost = parentPost {
+        if let parentPost = await parentPost() {
             if let childrenKeys = parentPost.children, let childIndex = childrenKeys.firstIndex(of: self.key) {
                 if before {
                     let firstIndex = (childIndex - count > 0) ? childIndex - count : 0
                     for i in firstIndex..<childrenKeys.count {
                         if result.count < count {
-                            if let childPost = Post.postWith(key: childrenKeys[i]) {
+                            if let childPost = await Post.postWith(key: childrenKeys[i]) {
                                 if !activeUsersOnly {
                                     result.append(childPost)
                                 } else if childPost.username == loggedinUsername {
                                     result.append(childPost)
-                                } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
+                                } else if let user = await User.userWith(username: childPost.username), user.userStatus == .active {
                                     result.append(childPost)
                                 }
                             }
@@ -244,12 +244,12 @@ public struct Post: Codable {
                 } else {
                     for i in childIndex..<childrenKeys.count {
                         if result.count < count {
-                            if let childPost = Post.postWith(key: childrenKeys[i]) {
+                            if let childPost = await Post.postWith(key: childrenKeys[i]) {
                                 if !activeUsersOnly {
                                     result.append(childPost)
                                 } else if childPost.username == loggedinUsername {
                                     result.append(childPost)
-                                } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
+                                } else if let user = await User.userWith(username: childPost.username), user.userStatus == .active {
                                     result.append(childPost)
                                 }
                             }
@@ -263,10 +263,10 @@ public struct Post: Codable {
             if let childrenKeys = children {
                 for childKey in childrenKeys {
                     if result.count < count {
-                        if let childPost = Post.postWith(key: childKey) {
+                        if let childPost = await Post.postWith(key: childKey) {
                             if !activeUsersOnly {
                                 result.append(childPost)
-                            } else if let user = User.userWith(username: childPost.username), user.userStatus == .active {
+                            } else if let user = await User.userWith(username: childPost.username), user.userStatus == .active {
                                 result.append(childPost)
                             }
                         }
@@ -279,25 +279,25 @@ public struct Post: Codable {
         return result
     }
     
-    public static func posts(withHashtagOrMention hashtagOrMention: String, searchText: String? = nil, beforePostTime: Int? = nil, count: Int) -> [Post] {
+    public static func posts(withHashtagOrMention hashtagOrMention: String, searchText: String? = nil, beforePostTime: Int? = nil, count: Int) async -> [Post] {
         var result = [Post]()
         
         var postKeys = [String]()
         if let searchText = searchText, !searchText.isEmpty {
             if let beforePostTime = beforePostTime {
-                forumDB.enumerateKeysAndValues(backward: true, startingAtKey: hashtagOrMention.lowercased() + "-\(beforePostTime)", andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
+                await database.enumerateKeysAndValues(backward: true, startingAtKey: hashtagOrMention.lowercased() + "-\(beforePostTime)", andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
                     if !postKeys.contains(hashtagOrMention.postKey) {
                         postKeys.append(hashtagOrMention.postKey)
                     }
                 }
             } else {
-                forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
+                await database.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
                     postKeys.append(hashtagOrMention.postKey)
                 }
             }
             postKeys = postKeys.sorted { $0 > $1 }
             for postKey in postKeys {
-                if let post: Post = forumDB[postKey] {
+                if let post: Post = await database.value(forKey: postKey) {
                     let theTextSearch = searchText.lowercased()
                     if post.message.lowercased().range(of: theTextSearch) != nil {
                         if result.count < count {
@@ -310,7 +310,7 @@ public struct Post: Codable {
             }
         } else {
             if let beforePostTime = beforePostTime {
-                forumDB.enumerateKeysAndValues(backward: true, startingAtKey: hashtagOrMention.lowercased() + "-\(beforePostTime)", andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
+                await database.enumerateKeysAndValues(backward: true, startingAtKey: hashtagOrMention.lowercased() + "-\(beforePostTime)", andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
                     if postKeys.count < count {
                         if !postKeys.contains(hashtagOrMention.postKey) {
                             postKeys.append(hashtagOrMention.postKey)
@@ -320,7 +320,7 @@ public struct Post: Codable {
                     }
                 }
             } else {
-                forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
+                await database.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: hashtagOrMention.lowercased() + "-") { (key, hashtagOrMention: HashtagOrMention, stop) in
                     if postKeys.count < count {
                         if !postKeys.contains(hashtagOrMention.postKey) {
                             postKeys.append(hashtagOrMention.postKey)
@@ -332,7 +332,7 @@ public struct Post: Codable {
             }
             postKeys = postKeys.sorted { $0 > $1 }
             for postKey in postKeys {
-                if let post: Post = forumDB[postKey] {
+                if let post: Post = await database.value(forKey: postKey) {
                     result.append(post)
                 }
             }
@@ -340,12 +340,12 @@ public struct Post: Codable {
         return result
     }
 
-    public static func posts(forUsername username: String, searchText: String = "", count: Int) -> [Post] {
+    public static func posts(forUsername username: String, searchText: String = "", count: Int) async -> [Post] {
         var result = [Post]()
         var postKeys = [String]()
         var postKeySet = Set<String>()
         if searchText == "" {
-            forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: UserPost.prefix + username + "-") { (key, userPost: UserPost, stop) in
+            await database.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: UserPost.prefix + username + "-") { (key, userPost: UserPost, stop) in
                 if postKeys.count < count {
                     if !postKeySet.contains(userPost.postKey) {
                         postKeySet.insert(userPost.postKey)
@@ -356,18 +356,18 @@ public struct Post: Codable {
                 }
             }
             for postKey in postKeys {
-                if let post: Post = forumDB[postKey] {
+                if let post: Post = await database.value(forKey: postKey) {
                     result.append(post)
                 }
             }
         } else {
             let theTextSearch = searchText.lowercased()
             var userPostKeys = [String]()
-            forumDB.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: UserPost.prefix + username + "-") { (key, userPost: UserPost, stop) in
+            await database.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: UserPost.prefix + username + "-") { (key, userPost: UserPost, stop) in
                 userPostKeys.append(userPost.postKey)
             }
             for userPostKey in userPostKeys {
-                if let post: Post = forumDB[userPostKey], post.message.lowercased().range(of: theTextSearch) != nil {
+                if let post: Post = await database.value(forKey: userPostKey), post.message.lowercased().range(of: theTextSearch) != nil {
                     if result.count < count {
                         result.append(post)
                     } else {
@@ -380,9 +380,9 @@ public struct Post: Codable {
         return result
     }
 
-    public static func posts(forUsernameOrMention username: String, searchText: String = "", count: Int) -> [Post] {
-        var result = posts(forUsername: username, searchText: searchText, count: count)
-        let result2 = posts(withHashtagOrMention: "@" + username, searchText: searchText, count: count)
+    public static func posts(forUsernameOrMention username: String, searchText: String = "", count: Int) async -> [Post] {
+        var result = await posts(forUsername: username, searchText: searchText, count: count)
+        let result2 = await posts(withHashtagOrMention: "@" + username, searchText: searchText, count: count)
         result.append(contentsOf: result2)
         result = result.sorted { $0.time > $1.time }
         if result.count > count {
@@ -391,11 +391,11 @@ public struct Post: Codable {
         return result
     }
     
-    public func pagePost(pageSize: Int) -> Post {
+    public func pagePost(pageSize: Int) async -> Post {
         var childrenKeys = [String]()
         if let children = self.children {
             childrenKeys = children
-        } else if let theParentPost = self.parentPost, let theChildrenKeys = theParentPost.children {
+        } else if let theParentPost = await self.parentPost(), let theChildrenKeys = theParentPost.children {
             childrenKeys = theChildrenKeys
             var postIndex = 0
             if let theIndex = childrenKeys.firstIndex(of: self.key), theIndex > 0 {
@@ -403,7 +403,7 @@ public struct Post: Codable {
             }
             let pageNumber = postIndex / pageSize
             let postKey = childrenKeys[pageNumber * pageSize]
-            if let post = Post.postWith(key: postKey) {
+            if let post = await Post.postWith(key: postKey) {
                 return post
             }
         }
@@ -413,7 +413,7 @@ public struct Post: Codable {
                 lastPageSize = pageSize
             }
             let lastPagePostKey = childrenKeys[childrenKeys.count - lastPageSize]
-            if let lastPagePost = Post.postWith(key: lastPagePostKey) {
+            if let lastPagePost = await Post.postWith(key: lastPagePostKey) {
                 return lastPagePost
             }
         }
@@ -431,39 +431,44 @@ public struct Post: Codable {
         }
     }
     
-    public func save() {
-        let postKey = Post.prefix + "\(time)-" + username
-        forumDB[postKey] = self
-        if isPrivate == true || parentPost?.isPrivate == true {
-            return // do not index private "admin" posts
-        }
-        let userPostKey = UserPost.prefix + username + "-\(time)"
-        forumDB[userPostKey] = UserPost(postKey: postKey)
-        for hashtag in message.hashtags {
-            forumDB[hashtag + "-\(time)-" + username] = HashtagOrMention(postKey: postKey)
-        }
-        for mention in message.mentions {
-            forumDB[mention + "-\(time)-" + username] = HashtagOrMention(postKey: postKey)
-        }
-        for word in Word.words(fromText: message) {
-            forumDB[Word.prefix + word + "-\(time)-" + username] = Word(postKey: postKey)
+    public func save() async {
+        do {
+            let postKey = Post.prefix + "\(time)-" + username
+            try await database.setValue(self, forKey: postKey)
+            let parentPost = await parentPost()
+            if isPrivate == true || parentPost?.isPrivate == true {
+                return // do not index private "admin" posts
+            }
+            let userPostKey = UserPost.prefix + username + "-\(time)"
+            try await database.setValue(UserPost(postKey: postKey), forKey: userPostKey)
+            for hashtag in message.hashtags {
+                try await database.setValue(HashtagOrMention(postKey: postKey), forKey: hashtag + "-\(time)-" + username)
+            }
+            for mention in message.mentions {
+                try await database.setValue(HashtagOrMention(postKey: postKey), forKey: mention + "-\(time)-" + username)
+            }
+            for word in Word.words(fromText: message) {
+                try await database.setValue(Word(postKey: postKey), forKey: Word.prefix + word + "-\(time)-" + username)
+            }
+        } catch {
+            NSLog("Post save failed, error: \(error)")
         }
     }
     
-    public func delete() {
+    public func delete() async {
         //print("delete: \(key)")
         if let children = children {
             //print("delete: let children = children")
             for childKey in children {
-                forumDB.removeValueForKey(childKey)
+                await database.removeValue(forKey: childKey)
             }
-        } else if var parentPost = parentPost {
+        } else if var parentPost = await parentPost() {
             //print("delete: parentPost: \(parentPost)")
             parentPost.children = parentPost.children?.filter { $0 != key }
-            parentPost.save()
+            await parentPost.save()
         }
         //print("delete: removeValueForKey: \(key)")
-        forumDB.removeValueForKey(key)
+        await database.removeValue(forKey: key)
     }
     
     // MARK: - Public functions
@@ -492,10 +497,10 @@ public struct Post: Codable {
         return result
     }
     
-    public static func posts(forKeys keys: [String]) -> [Post] {
+    public static func posts(forKeys keys: [String]) async -> [Post] {
         var result = [Post]()
         for postKey in keys {
-            if let post: Post = forumDB[postKey] {
+            if let post: Post = await database.value(forKey: postKey) {
                 result.append(post)
             }
         }

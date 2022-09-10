@@ -12,14 +12,14 @@ public struct Registration: Codable {
     
     public var isOpen: Bool
     
-    public static var isRegistrationOpen: Bool {
-        if let registration: Registration = forumDB[prefix] {
+    public static func isRegistrationOpen() async -> Bool {
+        if let registration: Registration = await database.value(forKey: prefix) {
             return registration.isOpen
         }
         return true
     }
 
-    public static func changeRegistration(toOpen: Bool) {
-        forumDB[Registration.prefix] = Registration(isOpen: toOpen)
+    public static func changeRegistration(toOpen: Bool) async {
+        try? await database.setValue(Registration(isOpen: toOpen), forKey: Registration.prefix)
     }
 }

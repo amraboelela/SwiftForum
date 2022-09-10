@@ -41,13 +41,13 @@ public struct Message: Codable {
         return Message(fromUsername: fromUsername, toUsername: toUsername, message: message, timeSent: Date.secondsSince1970)
     }
 
-    public static func messageWith(toUsername: String, time: Int, fromUsername: String) -> Message? {
+    public static func messageWith(toUsername: String, time: Int, fromUsername: String) async -> Message? {
         let messageKey = prefix + toUsername + "-\(time)" + "-" + fromUsername
-        return messageWith(key: messageKey)
+        return await messageWith(key: messageKey)
     }
     
-    public static func messageWith(key: String) -> Message? {
-        if let message: Message = forumDB[key] {
+    public static func messageWith(key: String) async -> Message? {
+        if let message: Message = await database.value(forKey: key) {
             return message
         }
         return nil
@@ -55,9 +55,9 @@ public struct Message: Codable {
     
     // MARK: - Reading data
 
-    public static func messages(toUsername: String, nonReadOnly: Bool = false, count: Int = 200) -> [Message] {
+    public static func messages(toUsername: String, nonReadOnly: Bool = false, count: Int = 200) async -> [Message] {
         var result = [Message]()
-        forumDB.enumerateKeysAndValues(backward: true, andPrefix: prefix + toUsername + "-") { (key, message: Message, stop) in
+        await database.enumerateKeysAndValues(backward: true, andPrefix: prefix + toUsername + "-") { (key, message: Message, stop) in
             if result.count < count {
                 if !nonReadOnly || message.timeRead == nil {
                     result.append(message)
@@ -71,9 +71,13 @@ public struct Message: Codable {
 
     // MARK: - Saving data
     
-    public func save() {
-        let messageKey = Message.prefix + toUsername + "-\(timeSent)-" + fromUsername
-        forumDB[messageKey] = self
+    public func save() async {
+        do {
+            let messageKey = Message.prefix + toUsername + "-\(timeSent)-" + fromUsername
+            try await database.setValue(self, forKey: messageKey)
+        } catch {
+            NSLog("Message save failed, error: \(error)")
+        }
     }
     
     // MARK: - Convenience methods
@@ -102,10 +106,10 @@ public struct Message: Codable {
         return result
     }
     
-    public static func messages(forKeys keys: [String]) -> [Message] {
+    public static func messages(forKeys keys: [String]) async -> [Message] {
         var result = [Message]()
         for messageKey in keys {
-            if let message: Message = forumDB[messageKey] {
+            if let message: Message = await database.value(forKey: messageKey) {
                 result.append(message)
             }
         }
@@ -114,15 +118,15 @@ public struct Message: Codable {
     
     // MARK: - Util methods
     
-    public static func deleteReadMessages() {
+    public static func deleteReadMessages() async {
         var keysToBeDeleted = [String]()
-        forumDB.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix) { (key, message: Message, stop) in
+        await database.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix) { (key, message: Message, stop) in
             if let timeRead = message.timeRead, Date.secondsSince1970 - timeRead > Int(Date.oneDay) {
                 keysToBeDeleted.append(key)
             }
         }
         for keyToBeDeleted in keysToBeDeleted {
-            forumDB.removeValueForKey(keyToBeDeleted)
+            await database.removeValue(forKey: keyToBeDeleted)
         }
     }
     
