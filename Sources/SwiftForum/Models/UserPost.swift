@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct UserPost: Codable {
+public struct UserPost: Codable, Sendable {
     public static let prefix = "userpost-"
     
     public var postKey: String

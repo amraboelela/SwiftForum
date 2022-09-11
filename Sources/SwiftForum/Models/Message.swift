@@ -8,7 +8,7 @@
 import Foundation
 import SwiftLevelDB
 
-public struct Message: Codable, Equatable {
+public struct Message: Codable, Equatable, Sendable {
     public static let prefix = "message-"
 
     public var fromUsername: String

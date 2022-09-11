@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Registration: Codable {
+public struct Registration: Codable, Sendable {
     public static let prefix = "registration"
     
     public var isOpen: Bool

@@ -7,6 +7,6 @@
 
 import Foundation
 
-public struct HashtagOrMention: Codable {
+public struct HashtagOrMention: Codable, Sendable {
     public var postKey: String
 }
