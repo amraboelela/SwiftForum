@@ -8,7 +8,7 @@
 import Foundation
 import SwiftLevelDB
 
-public struct Post: Codable, Equatable {
+public struct Post: Codable, Equatable, Sendable {
     public static let prefix = "post-"
     public static var numberOfReports = 0
 
