@@ -20,7 +20,7 @@ public enum UserStatus: String {
     case suspended
 }
 
-public struct User: Codable, Hashable {
+public struct User: Codable, Hashable, Sendable {
     public static let prefix = "user-"
     public static let avatars = "avatars"
     

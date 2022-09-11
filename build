@@ -1,9 +1,3 @@
 #!/bin/bash
 
-PARAM=x$1
-
-if [ $PARAM = "xrelease" ]; then
-    swift build -c release
-else
-    swift build -Xswiftc -DDEBUG 2<&1 | tee || exit
-fi
+swift build 2<&1 | tee || exit
