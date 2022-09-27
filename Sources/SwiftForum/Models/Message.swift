@@ -55,16 +55,31 @@ public struct Message: Codable, Equatable, Sendable {
     
     // MARK: - Reading data
 
-    public static func messages(toUsername: String, nonReadOnly: Bool = false, count: Int = 200) async -> [Message] {
+    public static func messages(toUsername: String, fromUsername: String? = nil, nonReadOnly: Bool = false, count: Int = 200) async -> [Message] {
         var result = [Message]()
-        await database.enumerateKeysAndValues(backward: true, andPrefix: prefix + toUsername + "-") { (key, message: Message, stop) in
-            if result.count < count {
+        if let fromUsername = fromUsername {
+            await database.enumerateKeysAndValues(backward: true, andPrefix: prefix + toUsername + "-") { (key, message: Message, stop) in
+                if fromUsername == message.fromUsername &&
+                    (!nonReadOnly || message.timeRead == nil) {
+                    result.append(message)
+                }
+            }
+            await database.enumerateKeysAndValues(backward: true, andPrefix: prefix + fromUsername + "-") { (key, message: Message, stop) in
+                if toUsername == message.fromUsername &&
+                    (!nonReadOnly || message.timeRead == nil) {
+                    result.append(message)
+                }
+            }
+            result = result.sorted { $0.timeSent < $1.timeSent }
+        } else {
+            await database.enumerateKeysAndValues(backward: true, andPrefix: prefix + toUsername + "-") { (key, message: Message, stop) in
                 if !nonReadOnly || message.timeRead == nil {
                     result.append(message)
                 }
-            } else {
-                stop.pointee = true
             }
+        }
+        if result.count > count {
+            result.removeFirst(result.count - count)
         }
         return result
     }
