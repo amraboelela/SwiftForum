@@ -57,9 +57,9 @@ public struct Message: Codable, Equatable, Sendable {
 
     public static func messages(toUsername: String, fromUsername: String? = nil, nonReadOnly: Bool = false, count: Int = 200) async -> [Message] {
         var result = [Message]()
-        NSLog("messages toUsername: \(toUsername)")
+        //NSLog("messages toUsername: \(toUsername)")
         if let fromUsername = fromUsername {
-            NSLog("fromUsername: \(fromUsername)")
+            //NSLog("fromUsername: \(fromUsername)")
             await database.enumerateKeysAndValues(backward: true, andPrefix: prefix + toUsername + "-") { (key, message: Message, stop) in
                 if fromUsername == message.fromUsername &&
                     (!nonReadOnly || message.timeRead == nil) {
@@ -75,13 +75,13 @@ public struct Message: Codable, Equatable, Sendable {
             result = result.sorted { $0.timeSent < $1.timeSent }
         } else {
             await database.enumerateKeysAndValues(backward: true, andPrefix: prefix + toUsername + "-") { (key, message: Message, stop) in
-                NSLog("message: \(message)")
+                //NSLog("message: \(message)")
                 if !nonReadOnly || message.timeRead == nil {
                     result.append(message)
                 }
             }
         }
-        NSLog("result: \(result)")
+        //NSLog("result: \(result)")
         if result.count > count {
             result.removeFirst(result.count - count)
         }
@@ -137,7 +137,7 @@ public struct Message: Codable, Equatable, Sendable {
     
     // MARK: - Util methods
     
-    public static func deleteReadMessages() async {
+    /*public static func deleteReadMessages() async {
         var keysToBeDeleted = [String]()
         await database.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix) { (key, message: Message, stop) in
             if let timeRead = message.timeRead, Date.secondsSince1970 - timeRead > Int(Date.oneDay) {
@@ -147,6 +147,6 @@ public struct Message: Codable, Equatable, Sendable {
         for keyToBeDeleted in keysToBeDeleted {
             await database.removeValue(forKey: keyToBeDeleted)
         }
-    }
+    }*/
     
 }
