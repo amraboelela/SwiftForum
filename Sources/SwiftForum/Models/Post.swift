@@ -185,9 +185,9 @@ public struct Post: Codable, Equatable, Sendable {
     // if this post is a child then show parent and siblings starting from current child
     public func childPosts(withSearchText searchText: String? = nil, count: Int, before: Bool = false, activeUsersOnly: Bool, loggedinUsername: String) async -> [Post] {
         var result = [Post]()
-            let theChildPosts = await childPosts(count: count, before: before, activeUsersOnly: activeUsersOnly, loggedinUsername: loggedinUsername)
         let searchWords = Word.words(fromText: searchText ?? "")
         if let firstWord = searchWords.first {
+            let theChildPosts = await childPosts(count: children?.count ?? count, before: before, activeUsersOnly: activeUsersOnly, loggedinUsername: loggedinUsername)
             var wordPostKeys = [String]()
             await database.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: Word.prefix + firstWord) { (key, word: Word, stop) in
                 wordPostKeys.append(word.postKey)
@@ -213,10 +213,11 @@ public struct Post: Codable, Equatable, Sendable {
             if result.count > count {
                 result.removeLast(result.count - count)
             }
+            return result
         } else {
-            return theChildPosts
+            return await childPosts(count: count, before: before, activeUsersOnly: activeUsersOnly, loggedinUsername: loggedinUsername)
+            //return theChildPosts
         }
-        return result
     }
     
     // if this post is a child then show parent and siblings starting from current child
