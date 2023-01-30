@@ -147,8 +147,25 @@ public struct User: Codable, Hashable, Sendable {
             return nil
         }
     }
+    
+    // MARK: - Reading data
 
-    // MARK: - Data handling
+    public static func users(
+        withSearchText searchText: String,
+        count: Int
+    ) async -> [User] {
+        var result = [User]()
+        await database.enumerateKeysAndValues(backward: true, andPrefix: prefix) { (key, user: User, stop) in
+            if result.count < count {
+                result.append(user)
+            } else {
+                stop.pointee = true
+            }
+        }
+        return result
+    }
+    
+    // MARK: - updating data
 
     public func update(location: String, bio: String, url: String) -> User {
         var result = self
