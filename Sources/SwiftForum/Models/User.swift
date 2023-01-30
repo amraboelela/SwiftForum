@@ -162,7 +162,7 @@ public struct User: Codable, Hashable, Sendable {
     
     public static func users(withSearchText searchText: String? = nil, count: Int? = nil) async -> [User] {
         var result = [User]()
-        await database.enumerateKeysAndValues(backward: true, andPrefix: prefix) { (key, user: User, stop) in
+        await database.enumerateKeysAndValues(backward: false, andPrefix: prefix) { (key, user: User, stop) in
             if let count = count {
                 if result.count < count {
                     result.append(user)
@@ -173,7 +173,8 @@ public struct User: Codable, Hashable, Sendable {
                 result.append(user)
             }
         }
-        return result
+        let sortedResult = result.sorted { $0.timeJoined > $1.timeJoined }
+        return sortedResult
     }
     
     // MARK: - updating data
