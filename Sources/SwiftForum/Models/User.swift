@@ -42,6 +42,10 @@ public struct User: Codable, Hashable, Sendable {
         return User.prefix + username
     }
     
+    public var lastActiveTime: Int {
+        return timeLoggedin ?? timeJoined
+    }
+    
     public var userRole: UserRole {
         get {
             if let role = role, let result = UserRole(rawValue:role) {
@@ -173,7 +177,7 @@ public struct User: Codable, Hashable, Sendable {
                 result.append(user)
             }
         }
-        let sortedResult = result.sorted { $0.timeJoined > $1.timeJoined }
+        let sortedResult = result.sorted { $0.lastActiveTime > $1.lastActiveTime }
         return sortedResult
     }
     
