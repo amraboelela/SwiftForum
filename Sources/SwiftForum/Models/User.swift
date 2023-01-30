@@ -168,7 +168,7 @@ public struct User: Codable, Hashable, Sendable {
         hasher.combine(username)
     }
     
-    // MARK: - Public functions
+    // MARK: - Public static functions
 
     public static func usernameExists(_ username: String) async -> Bool {
         if let _: User = await database.value(forKey: User.prefix + username) {
