@@ -42,10 +42,6 @@ public struct User: Codable, Hashable, Sendable {
         return User.prefix + username
     }
     
-    public var lastActiveTime: Int {
-        return timeLoggedin ?? timeJoined
-    }
-    
     public var userRole: UserRole {
         get {
             if let role = role, let result = UserRole(rawValue:role) {
@@ -109,7 +105,7 @@ public struct User: Codable, Hashable, Sendable {
         }
         return result
     }
-
+    
     public var joinedDate: String {
         return Date.friendlyDateStringFrom(epochTime: TimeInterval(timeJoined))
     }
@@ -120,6 +116,14 @@ public struct User: Codable, Hashable, Sendable {
         } else {
             return ""
         }
+    }
+    
+    public var lastActiveTime: Int {
+        return timeLoggedin ?? timeJoined
+    }
+    
+    public var lastActiveDate: String {
+        return Date.friendlyDateStringFrom(epochTime: TimeInterval(lastActiveTime))
     }
     
     public func nonReadMessages() async -> [Message]? {
