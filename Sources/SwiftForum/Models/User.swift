@@ -160,13 +160,17 @@ public struct User: Codable, Hashable, Sendable {
         return result
     }
     
-    public static func users(withSearchText searchText: String, count: Int) async -> [User] {
+    public static func users(withSearchText searchText: String? = nil, count: Int? = nil) async -> [User] {
         var result = [User]()
         await database.enumerateKeysAndValues(backward: true, andPrefix: prefix) { (key, user: User, stop) in
-            if result.count < count {
-                result.append(user)
+            if let count = count {
+                if result.count < count {
+                    result.append(user)
+                } else {
+                    stop.pointee = true
+                }
             } else {
-                stop.pointee = true
+                result.append(user)
             }
         }
         return result
