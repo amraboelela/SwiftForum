@@ -150,10 +150,17 @@ public struct User: Codable, Hashable, Sendable {
     
     // MARK: - Reading data
 
-    public static func users(
-        withSearchText searchText: String,
-        count: Int
-    ) async -> [User] {
+    public static func users(withUsernamePrefix usernamePrefix: String) async -> [User] {
+        var result = [User]()
+        await database.enumerateKeysAndValues(backward: true, startingAtKey: nil, andPrefix: prefix + usernamePrefix) { (key, user: User, stop) in
+            if user.userStatus != .suspended {
+                result.append(user)
+            }
+        }
+        return result
+    }
+    
+    public static func users(withSearchText searchText: String, count: Int) async -> [User] {
         var result = [User]()
         await database.enumerateKeysAndValues(backward: true, andPrefix: prefix) { (key, user: User, stop) in
             if result.count < count {
@@ -193,16 +200,6 @@ public struct User: Codable, Hashable, Sendable {
         } else {
             return false
         }
-    }
-    
-    public static func users(withUsernamePrefix usernamePrefix: String) async -> [User] {
-        var result = [User]()
-        await database.enumerateKeysAndValues(backward: false, startingAtKey: nil, andPrefix: prefix + usernamePrefix) { (key, user: User, stop) in
-            if user.userStatus != .suspended {
-                result.append(user)
-            }
-        }
-        return result
     }
     
 }
