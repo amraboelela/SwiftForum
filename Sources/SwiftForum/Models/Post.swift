@@ -457,22 +457,18 @@ public struct Post: Codable, Equatable, Sendable {
     }
     
     public func delete() async {
-        //print("delete: \(key)")
         if let children = children {
-            //print("delete: let children = children")
             for childKey in children {
                 await database.removeValue(forKey: childKey)
             }
         } else if var parentPost = await parentPost() {
-            //print("delete: parentPost: \(parentPost)")
             parentPost.children = parentPost.children?.filter { $0 != key }
             await parentPost.save()
         }
-        //print("delete: removeValueForKey: \(key)")
         await database.removeValue(forKey: key)
     }
     
-    // MARK: - Public functions
+    // MARK: - Public static functions
     
     public static func key(ofPost post: Post) -> String {
         return prefix + "\(post.time)-" + post.username

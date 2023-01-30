@@ -38,6 +38,10 @@ public struct User: Codable, Hashable, Sendable {
 
     // MARK: - Accessors
 
+    public var key: String {
+        return User.prefix + username
+    }
+    
     public var userRole: UserRole {
         get {
             if let role = role, let result = UserRole(rawValue:role) {
@@ -154,6 +158,10 @@ public struct User: Codable, Hashable, Sendable {
         return result
     }
 
+    public func delete() async {
+        await database.removeValue(forKey: key)
+    }
+    
     // MARK: - Delegates
 
     public func hash(into hasher: inout Hasher) {
