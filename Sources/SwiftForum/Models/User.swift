@@ -35,7 +35,8 @@ public struct User: Codable, Hashable, Sendable {
     public var location: String?
     public var url: String?
     public var avatar: String?
-
+    public var viewed: Bool?
+    
     // MARK: - Accessors
 
     public var key: String {
@@ -183,6 +184,16 @@ public struct User: Codable, Hashable, Sendable {
         }
         let sortedResult = result.sorted { $0.lastActiveTime > $1.lastActiveTime }
         return sortedResult
+    }
+    
+    public static func newUsers() async -> [User] {
+        var result = [User]()
+        await database.enumerateKeysAndValues(backward: false, andPrefix: prefix) { (key, user: User, stop) in
+            if user.viewed != true {
+                result.append(user)
+            }
+        }
+        return result
     }
     
     // MARK: - updating data
