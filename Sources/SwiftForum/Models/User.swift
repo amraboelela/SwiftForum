@@ -206,6 +206,10 @@ public struct User: Codable, Hashable, Sendable {
         return result
     }
 
+    public func save() async {
+        try? await database.setValue(self, forKey: User.prefix + username)
+    }
+    
     public func delete() async {
         await database.removeValue(forKey: key)
     }
