@@ -440,6 +440,14 @@ public struct Post: Codable, Equatable, Sendable {
         }
     }
     
+    public func incrementSubjectViews() async {
+        var subjectPost = await subjectPost()
+        var subjectNumberOfViews = subjectPost.numberOfViews ?? 0
+        subjectNumberOfViews += 1
+        subjectPost.numberOfViews = subjectNumberOfViews
+        await subjectPost.save()
+    }
+    
     public func save() async {
         do {
             let postKey = Post.prefix + "\(time)-" + username
