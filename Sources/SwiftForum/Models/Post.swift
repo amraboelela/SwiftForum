@@ -22,6 +22,7 @@ public struct Post: Codable, Equatable, Sendable {
     public var isPrivate: Bool?
     public var pinned: Bool?
     public var reportedBy: [String]? // usernames
+    public var numberOfViews: Int?
     
     // MARK: - Accessors
     
@@ -60,6 +61,13 @@ public struct Post: Codable, Equatable, Sendable {
             return post
         }
         return nil
+    }
+    
+    public func subjectPost() async -> Post {
+        if let parentPost = await parentPost() {
+            return parentPost
+        }
+        return self
     }
     
     public var postDate: String {
