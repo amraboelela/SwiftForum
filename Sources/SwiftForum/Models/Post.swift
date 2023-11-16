@@ -440,12 +440,13 @@ public struct Post: Codable, Equatable, Sendable {
         }
     }
     
-    public func incrementSubjectViews() async {
+    public func incrementSubjectViews() async -> Int {
         var subjectPost = await subjectPost()
         var subjectNumberOfViews = subjectPost.numberOfViews ?? 0
         subjectNumberOfViews += 1
         subjectPost.numberOfViews = subjectNumberOfViews
         await subjectPost.save()
+        return subjectNumberOfViews
     }
     
     public func save() async {
