@@ -67,6 +67,11 @@ public struct User: Codable, Hashable, Sendable {
         }
     }
     
+    public static func guestUser(id: String) -> User {
+        let username = "guest_" + id.lowercased().suffix(5)
+        return User(username: username, password: "", timeJoined: Date.secondsSince1970)
+    }
+    
     public var arabicUserRole: String {
         let userRole = self.userRole
         switch userRole {
