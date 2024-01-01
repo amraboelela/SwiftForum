@@ -75,13 +75,13 @@ public struct Message: Codable, Equatable, Sendable {
             result = result.sorted { $0.timeSent < $1.timeSent }
         } else {
             await database.enumerateKeysAndValues(backward: true, andPrefix: prefix + toUsername + "-") { (key, message: Message, stop) in
-                //NSLog("message: \(message)")
+                NSLog("message: \(message)")
                 if !nonReadOnly || message.timeRead == nil {
                     result.append(message)
                 }
             }
         }
-        //NSLog("result: \(result)")
+        NSLog("result: \(result)")
         if result.count > count {
             result.removeFirst(result.count - count)
         }

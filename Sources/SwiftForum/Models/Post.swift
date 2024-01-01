@@ -87,6 +87,7 @@ public struct Post: Codable, Equatable, Sendable {
     
     public static func postWith(key: String) async -> Post? {
         if let post: Post = await database.value(forKey: key) {
+            NSLog("postWith: key: \(key), post: \(post)")
             return post
         }
         return nil
@@ -141,7 +142,7 @@ public struct Post: Codable, Equatable, Sendable {
                 result.removeLast(result.count - count)
             }
         } else {
-            //logger.log("getPosts, searchText is empty")
+            logger.log("getPosts, searchText is empty")
             var startAtKey: String? = nil
             if let time = time {
                 startAtKey = prefix + "\(time)"
@@ -187,6 +188,7 @@ public struct Post: Codable, Equatable, Sendable {
             }
             
         }
+        NSLog("posts: \(result)")
         return result
     }
 
@@ -285,6 +287,7 @@ public struct Post: Codable, Equatable, Sendable {
                 }
             }
         }
+        NSLog("childPosts, result: \(result)")
         return result
     }
     
@@ -346,6 +349,7 @@ public struct Post: Codable, Equatable, Sendable {
                 }
             }
         }
+        NSLog("postsWithHashtagOrMention, hashtagOrMention: \(hashtagOrMention), result: \(result)")
         return result
     }
 
@@ -386,6 +390,7 @@ public struct Post: Codable, Equatable, Sendable {
             }
             
         }
+        NSLog("postsForUsername, username: \(username), result: \(result)")
         return result
     }
 
@@ -397,6 +402,7 @@ public struct Post: Codable, Equatable, Sendable {
         if result.count > count {
             result.removeLast(result.count - count)
         }
+        NSLog("postsForUsernameOrMention, username: \(username), result: \(result)")
         return result
     }
     
@@ -518,6 +524,7 @@ public struct Post: Codable, Equatable, Sendable {
                 result.append(post)
             }
         }
+        NSLog("postsForKeys, keys: \(keys), result: \(result)")
         return result
     }
     
