@@ -406,7 +406,7 @@ public struct Post: Codable, Equatable, Sendable {
         return result
     }
     
-    public func pagePost(pageSize: Int) async -> Post {
+    public mutating func pagePost(pageSize: Int) async -> Post {
         var childrenKeys = [String]()
         if let children = self.children {
             childrenKeys = children
@@ -433,11 +433,18 @@ public struct Post: Codable, Equatable, Sendable {
                 NSLog("pagePost, lastPageSize == 0")
                 lastPageSize = pageSize
             }
-            let lastPagePostKey = childrenKeys[childrenKeys.count - lastPageSize]
-            NSLog("pagePost, lastPagePostKey: \(lastPagePostKey)")
-            if let lastPagePost = await Post.postWith(key: lastPagePostKey) {
-                NSLog("pagePost, lastPagePost: \(lastPagePost)")
-                return lastPagePost
+            var index = childrenKeys.count - lastPageSize
+            while index < childrenKeys.count {
+                let lastPagePostKey = childrenKeys[index]
+                NSLog("pagePost, lastPagePostKey: \(lastPagePostKey)")
+                if let lastPagePost = await Post.postWith(key: lastPagePostKey) {
+                    NSLog("pagePost, lastPagePost: \(lastPagePost)")
+                    return lastPagePost
+                } else {
+                    self.children = childrenKeys.filter { $0 != lastPagePostKey }
+                    await self.save()
+                }
+                index += 1
             }
         }
         return self
