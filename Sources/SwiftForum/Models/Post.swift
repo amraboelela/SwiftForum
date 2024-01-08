@@ -428,13 +428,15 @@ public struct Post: Codable, Equatable, Sendable {
         if childrenKeys.count > pageSize {
             NSLog("pagePost, childrenKeys.count > pageSize")
             var lastPageSize = childrenKeys.count % pageSize
+            NSLog("pagePost, lastPageSize: \(lastPageSize)")
             if lastPageSize == 0 {
                 NSLog("pagePost, lastPageSize == 0")
                 lastPageSize = pageSize
             }
             let lastPagePostKey = childrenKeys[childrenKeys.count - lastPageSize]
+            NSLog("pagePost, lastPagePostKey: \(lastPagePostKey)")
             if let lastPagePost = await Post.postWith(key: lastPagePostKey) {
-                NSLog("pagePost, let lastPagePost = await Post.postWith(key: lastPagePostKey), lastPagePost: \(lastPagePost)")
+                NSLog("pagePost, lastPagePost: \(lastPagePost)")
                 return lastPagePost
             }
         }
