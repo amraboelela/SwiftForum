@@ -188,7 +188,7 @@ public struct Post: Codable, Equatable, Sendable {
             }
             
         }
-        NSLog("posts: \(result)")
+        //NSLog("posts: \(result)")
         return result
     }
 
@@ -287,7 +287,7 @@ public struct Post: Codable, Equatable, Sendable {
                 }
             }
         }
-        NSLog("childPosts, result: \(result)")
+        //NSLog("childPosts, result: \(result)")
         return result
     }
     

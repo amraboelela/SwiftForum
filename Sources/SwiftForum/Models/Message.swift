@@ -81,7 +81,7 @@ public struct Message: Codable, Equatable, Sendable {
                 }
             }
         }
-        NSLog("result: \(result)")
+        NSLog("messages, result: \(result)")
         if result.count > count {
             result.removeFirst(result.count - count)
         }
