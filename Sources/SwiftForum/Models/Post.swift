@@ -87,7 +87,7 @@ public struct Post: Codable, Equatable, Sendable {
     
     public static func postWith(key: String) async -> Post? {
         if let post: Post = await database.value(forKey: key) {
-            NSLog("postWith: key: \(key), post: \(post)")
+            //NSLog("postWith: key: \(key), post: \(post)")
             return post
         }
         return nil
