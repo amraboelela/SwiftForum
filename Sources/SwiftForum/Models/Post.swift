@@ -410,8 +410,10 @@ public struct Post: Codable, Equatable, Sendable {
         var childrenKeys = [String]()
         if let children = self.children {
             childrenKeys = children
+            NSLog("pagePost, childrenKeys: \(childrenKeys)")
         } else if let theParentPost = await self.parentPost(), let theChildrenKeys = theParentPost.children {
             childrenKeys = theChildrenKeys
+            NSLog("pagePost, else if let theParentPost, childrenKeys: \(childrenKeys)")
             var postIndex = 0
             if let theIndex = childrenKeys.firstIndex(of: self.key), theIndex > 0 {
                 postIndex = theIndex - 1
@@ -419,16 +421,20 @@ public struct Post: Codable, Equatable, Sendable {
             let pageNumber = postIndex / pageSize
             let postKey = childrenKeys[pageNumber * pageSize]
             if let post = await Post.postWith(key: postKey) {
+                NSLog("pagePost, let post = await Post.postWith(key: postKey), post: \(post)")
                 return post
             }
         }
         if childrenKeys.count > pageSize {
+            NSLog("pagePost, childrenKeys.count > pageSize")
             var lastPageSize = childrenKeys.count % pageSize
             if lastPageSize == 0 {
+                NSLog("pagePost, lastPageSize == 0")
                 lastPageSize = pageSize
             }
             let lastPagePostKey = childrenKeys[childrenKeys.count - lastPageSize]
             if let lastPagePost = await Post.postWith(key: lastPagePostKey) {
+                NSLog("pagePost, let lastPagePost = await Post.postWith(key: lastPagePostKey), lastPagePost: \(lastPagePost)")
                 return lastPagePost
             }
         }
