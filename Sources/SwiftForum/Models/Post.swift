@@ -349,7 +349,7 @@ public struct Post: Codable, Equatable, Sendable {
                 }
             }
         }
-        NSLog("postsWithHashtagOrMention, hashtagOrMention: \(hashtagOrMention), result: \(result)")
+        //NSLog("postsWithHashtagOrMention, hashtagOrMention: \(hashtagOrMention), result: \(result)")
         return result
     }
 
@@ -402,7 +402,7 @@ public struct Post: Codable, Equatable, Sendable {
         if result.count > count {
             result.removeLast(result.count - count)
         }
-        NSLog("postsForUsernameOrMention, username: \(username), result: \(result)")
+        //NSLog("postsForUsernameOrMention, username: \(username), result: \(result)")
         return result
     }
     
@@ -441,6 +441,7 @@ public struct Post: Codable, Equatable, Sendable {
                     NSLog("pagePost, lastPagePost: \(lastPagePost)")
                     return lastPagePost
                 } else {
+                    NSLog("pagePost, couldn't get post with lastPagePostKey: \(lastPagePostKey)")
                     self.children = childrenKeys.filter { $0 != lastPagePostKey }
                     await self.save()
                 }
