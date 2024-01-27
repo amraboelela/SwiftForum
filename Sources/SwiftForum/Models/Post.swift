@@ -442,11 +442,11 @@ public struct Post: Codable, Equatable, Sendable {
                     return lastPagePost
                 } else {
                     NSLog("pagePost, couldn't get post with lastPagePostKey: \(lastPagePostKey)")
-                    NSLog("pagePost, couldn't get post with self.children.count: \(self.children?.count)")
+                    //NSLog("pagePost, couldn't get post with self.children.count: \(self.children?.count)")
                     let filteredChildrenKeys = childrenKeys.filter { $0 != lastPagePostKey }
                     childrenKeys = filteredChildrenKeys
                     self.children = filteredChildrenKeys
-                    NSLog("pagePost, couldn't get post with filteredChildrenKeys: \(filteredChildrenKeys)")
+                    //NSLog("pagePost, couldn't get post with filteredChildrenKeys: \(filteredChildrenKeys)")
                     await self.save()
                 }
                 index += 1
