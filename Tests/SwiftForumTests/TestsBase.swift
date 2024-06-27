@@ -6,12 +6,12 @@ class TestsBase: XCTestCase {
     
     func asyncSetup() async {
         if database != nil {
-            if await database.db != nil {
+            if await database.exists {
                 try? await database.deleteDatabaseFromDisk()
             }
         }
         try? await Task.sleep(seconds: 1.0)
-        let testRoot = URL(fileURLWithPath: #file.replacingOccurrences(of: "DarkEyeCoreTests/TestsBase.swift", with: "/")).path
+        let testRoot = URL(fileURLWithPath: #file.replacingOccurrences(of: "SwiftForumTests/TestsBase.swift", with: "/")).path
         database = LevelDB(parentPath: testRoot + "Library", name: "Database")
         //Crawler.crawler = nil
     }
